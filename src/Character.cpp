@@ -1,0 +1,220 @@
+// Character.cpp
+#include "Character.h"
+#include "SpriteRenderer.h"
+#include "Animator.h"
+#include "Gun.h"
+#include "Camera.h"
+#include "Game.h"
+#include "State.h"
+#include <iostream>
+#include <Collider.h>
+#include <Bullet.h>
+
+Character* Character::player = nullptr;
+int Character::npcCount = 0;
+
+Character::Character(GameObject& associated, std::string sprite)
+    : Component(associated), speed(0, 0), linearSpeed(0), hp(100), 
+      deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav") {
+
+    
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 3, 4);
+    associated.AddComponent(new Collider(associated));
+    associated.AddComponent(spriteRenderer);
+
+    associated.box.w = spriteRenderer->GetWidth();
+    associated.box.h = spriteRenderer->GetHeight();
+
+    Animator* animator = new Animator(associated);
+    animator->AddAnimation("idle", Animation(6, 9, 9, SDL_FLIP_NONE));
+    animator->AddAnimation("idle_left", Animation(6, 9, 9, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("walking", Animation(0, 5, 3, SDL_FLIP_NONE));
+    animator->AddAnimation("walking_left", Animation(0, 5, 3, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("dead", Animation(10, 11, 12,SDL_FLIP_NONE));
+    animator->SetAnimation("idle");
+    associated.AddComponent(animator);
+
+    if (player){
+        npcCount++;
+    }
+    
+    if (!player)
+        player = this;
+
+    
+}
+
+Character::~Character() {
+    if (player == this) {
+        player = nullptr;
+    }
+}
+
+void Character::Start() {
+    auto& state = Game::GetInstance().GetCurrentState();
+
+    GameObject* gunGO = new GameObject();
+    gunGO->box = associated.box;
+
+    gunGO->AddComponent(new Gun(*gunGO, state.GetObjectPtr(&associated)));
+
+    gun = state.AddObject(gunGO);  // Guarda o weak_ptr
+    
+}
+
+
+void Character::Update(float dt) {
+    Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+
+
+    damageCooldown.Update(dt);
+    if (hp <= 0) {
+        auto gunPtr = gun.lock();
+        if (gunPtr) {
+            gunPtr->RequestDelete();
+        }
+        isDead = true;
+        animator->SetAnimation("dead");
+    }
+
+    if (isDead) {
+        deathTimer.Update(dt);
+        if (deathTimer.Get() > 3.0f) {
+            associated.RequestDelete();
+        }
+        return;
+    }
+
+    // Executar comandos pendentes
+    while (!taskQueue.empty() && !isDead) {
+        Command cmd = taskQueue.front();
+        taskQueue.pop();
+
+        if (cmd.type == Command::MOVE) {
+            speed = (cmd.pos - associated.box.Center()).Normalized();
+            linearSpeed = 200;
+        } else if (cmd.type == Command::SHOOT) { //VERIFICAR
+            auto gunPtr = gun.lock();
+            if (!gunPtr) {
+                std::cerr << "[Character] Gun pointer expired!\n";
+            } else {
+                Gun* gunComponent = (Gun*)gunPtr->GetComponent("Gun");
+                if (!gunComponent) {
+                    std::cerr << "[Character] Gun component not found!\n";
+                } else {
+                    std::cerr << "[Character] Shooting towards (" << cmd.pos.x << ", " << cmd.pos.y << ")\n";
+                    (gunComponent)->Shoot(cmd.pos);
+                }
+            }
+
+        }
+    }
+
+    // Movimento
+    associated.box.x += speed.x * linearSpeed * dt;
+    associated.box.y += speed.y * linearSpeed * dt;
+
+    const float mapStartX = 640;
+    const float mapStartY = 512;
+    const float mapEndX = 640 + 1280;
+    const float mapEndY = 512 + 1536;
+
+    associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
+    associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
+
+
+    // Atualizar animação
+    if (speed.Magnitude() > 0.1f) {
+        if (speed.x < -0.1f) {
+            animator->SetAnimation("walking_left");
+            this->facingLeft = true;
+        } else if (speed.x > 0.1f) {
+            animator->SetAnimation("walking");
+            this->facingLeft = false;
+        } else {
+            if (this->facingLeft) {
+                animator->SetAnimation("walking_left");
+            } else {
+                animator->SetAnimation("walking");
+            }
+        }
+    } else {
+        if (this->facingLeft) {
+            animator->SetAnimation("idle_left");
+        } else
+        animator->SetAnimation("idle");
+        
+    }
+
+    
+
+    // Reset velocidade
+    linearSpeed = 0;
+    speed = Vec2(0, 0);
+}
+
+void Character::Render() {}
+
+bool Character::Is(std::string type) const {
+    return type == "Character";
+}
+
+void Character::Issue(Command task) {
+    taskQueue.push(task);
+}
+
+void Character::NotifyCollision(GameObject& other) {
+    // Bullet
+    bool isPlayer = (this == Character::player);
+    if (other.GetComponent("Bullet") != nullptr) {
+        Bullet* bullet = static_cast<Bullet*>(other.GetComponent("Bullet"));
+
+        if (bullet->targetsPlayer) {
+            if (isPlayer) {
+                if (damageCooldown.Get() > 0.5f) {
+                    TakeDamage(10);
+                    damageCooldown.Restart();
+                }
+            }
+        } else {
+            if (!isPlayer) {
+                if (damageCooldown.Get() > 0.5f) {
+                    TakeDamage(10);
+                    damageCooldown.Restart();
+                }
+            }
+        }
+    }
+
+    // Zombie
+    if (other.GetComponent("Zombie") != nullptr) {
+        if (isPlayer){
+            if (damageCooldown.Get() > 0.5f) {
+            TakeDamage(10);
+            damageCooldown.Restart();
+            }
+        }
+    }
+}
+
+void Character::TakeDamage(int damage) {
+    if (hp <= 0 || isDead) {
+        return; // Já está morto ou não pode receber dano
+    }
+    hp -= damage;
+    hitSound.Play(1);
+    std::cout << "[Character] Took damage. HP: " << hp << std::endl;
+
+    if (hp <= 0) {
+        deathSound.Play(1);
+        Component* col = associated.GetComponent("Collider");
+        if (col) {
+            associated.RemoveComponent(col);
+        }
+        if (this == Character::player) {
+            Camera::Unfollow();
+        } else {
+            npcCount--;
+        }
+    }
+}
