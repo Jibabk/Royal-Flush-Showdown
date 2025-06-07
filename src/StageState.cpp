@@ -14,6 +14,7 @@
 #include <iostream>
 #include <GameData.h>
 #include "EndState.h"
+#include "Boss.h"
 
 StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     // Background
@@ -37,7 +38,16 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     playerGO->AddComponent(new Character(*playerGO, "Recursos/img/Player.png"));
     playerGO->AddComponent(new PlayerController(*playerGO));
     AddObject(playerGO);
-    Camera::Follow(playerGO);
+    //Camera::Follow(playerGO);
+
+    // Chefão (Boss)
+    GameObject* BossGO = new GameObject();
+    BossGO->box.x = 1380;
+    BossGO->box.y = 1380;
+    BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/reiSprite.png"));
+    AddObject(BossGO);
+    Camera::Follow(BossGO);
+
 
     // Spawner
     GameObject* spawnerGO = new GameObject();

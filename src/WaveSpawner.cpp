@@ -40,10 +40,7 @@ void WaveSpawner::Update(float dt) {
     const Wave& wave = waves[currentWave];
 
     // Checa se ainda há zumbis a serem spawnados
-    std::cout << "Wave " << currentWave + 1 << ": " 
-              << zombieCounter << "/" << wave.zombies 
-              << " zombies, " << npcCounter << "/" << wave.npcs 
-              << " NPCs." << std::endl;
+    //std::cout << "Wave " << currentWave + 1 << ": " << zombieCounter << "/" << wave.zombies << " zombies, " << npcCounter << "/" << wave.npcs << " NPCs." << std::endl;
 
     
     if (zombieCounter < wave.zombies) {
@@ -61,8 +58,8 @@ void WaveSpawner::Update(float dt) {
         }
     }
     else {
-        std::cout << "zombieCounte:" << Zombie::zombieCount << std::endl;
-        std::cout << "npcCounter:" << Character::npcCount << std::endl;
+        //std::cout << "zombieCounte:" << Zombie::zombieCount << std::endl;
+        //std::cout << "npcCounter:" << Character::npcCount << std::endl;
         // Só passa para próxima wave se não tiver mais zumbis vivos
         if (Zombie::zombieCount == 0 && Character::npcCount == 0) {
             currentWave++;

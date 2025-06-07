@@ -91,7 +91,7 @@ void Gun::Shoot(Vec2 target) {
     GameObject* bulletGO = new GameObject();
     bulletGO->box.x = associated.box.x + associated.box.w / 2 - 5; // centraliza a bala
     bulletGO->box.y = associated.box.y + associated.box.h / 2 - 5; // centraliza a bala
-    bulletGO->AddComponent(new SpriteRenderer(*bulletGO, "Recursos/img/Bullet.png", 3, 2));
+    bulletGO->AddComponent(new SpriteRenderer(*bulletGO, "Recursos/img/cartinha.png", 3, 2));
     bulletGO->AddComponent(new Animator(*bulletGO));
     bulletGO->AddComponent(new Bullet(*bulletGO, angle, 1000, 10, 500,targetsPlayer)); // velocidade, dano, distância máxima
     state.AddObject(bulletGO);  // adiciona a bala ao estado

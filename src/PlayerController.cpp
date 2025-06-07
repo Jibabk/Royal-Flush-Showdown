@@ -20,17 +20,17 @@ void PlayerController::Update(float dt) {
     // Direção
     Vec2 direction(0, 0);
 
-    if (input.IsKeyDown(W_KEY) || input.IsKeyDown(UP_ARROW_KEY)) {
-        direction.y -= 1;
+    if (input.KeyPress(W_KEY) || input.KeyPress(UP_ARROW_KEY)) {
+        direction.y -= 100;
     }
-    if (input.IsKeyDown(S_KEY) || input.IsKeyDown(DOWN_ARROW_KEY)) {
-        direction.y += 1;
+    if (input.KeyPress(S_KEY) || input.KeyPress(DOWN_ARROW_KEY)) {
+        direction.y += 100;
     }
-    if (input.IsKeyDown(A_KEY) || input.IsKeyDown(LEFT_ARROW_KEY)) {
-        direction.x -= 1;
+    if (input.KeyPress(A_KEY) || input.KeyPress(LEFT_ARROW_KEY)) {
+        direction.x -= 100;
     }
-    if (input.IsKeyDown(D_KEY) || input.IsKeyDown(RIGHT_ARROW_KEY)) {
-        direction.x += 1;
+    if (input.KeyPress(D_KEY) || input.KeyPress(RIGHT_ARROW_KEY)) {
+        direction.x += 100;
     }
 
     // Se há direção, emite comando de movimento
