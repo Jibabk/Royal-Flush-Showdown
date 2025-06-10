@@ -7,6 +7,7 @@
 #include "Vec2.h"
 #include "Timer.h"
 #include "Sound.h"
+#include "SDL_include.h"
 
 class Character : public Component {
 public:

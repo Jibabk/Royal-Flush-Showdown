@@ -15,6 +15,7 @@
 #include <GameData.h>
 #include "EndState.h"
 #include "Boss.h"
+#include "BossAiController.h"
 
 StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     // Background
@@ -45,6 +46,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     BossGO->box.x = 1380;
     BossGO->box.y = 1380;
     BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/reiSprite.png"));
+    BossGO->AddComponent(new BossAiController(*BossGO));
     AddObject(BossGO);
     Camera::Follow(BossGO);
 
@@ -126,7 +128,7 @@ void StageState::Update(float dt) {
         popRequested = true;
         Game::GetInstance().Push(new EndState());
     }
-    if ((WaveSpawner::quest->GetZombieCount() == 0) && (WaveSpawner::quest->IsFinished())) { 
+    if (Boss::chefe == nullptr) { 
         GameData::playerVictory = true;
         popRequested = true;
         Game::GetInstance().Push(new EndState());

@@ -9,12 +9,13 @@
 #include <iostream>
 #include <Collider.h>
 #include <Bullet.h>
+#include <Resources.h>
 
 Character* Character::player = nullptr;
 int Character::npcCount = 0;
 
 Character::Character(GameObject& associated, std::string sprite)
-    : Component(associated), speed(0, 0), linearSpeed(0), hp(100), 
+    : Component(associated), speed(0, 0), linearSpeed(0), hp(3), 
       deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav") {
 
     
@@ -153,7 +154,27 @@ void Character::Update(float dt) {
     speed = Vec2(0, 0);
 }
 
-void Character::Render() {}
+void Character::Render() {
+    // Desenha os corações (vida) no canto superior esquerdo da tela
+    SDL_Texture* heartTex = Resources::GetImage("Recursos/img/cartinha.png");
+    if (!heartTex) return;
+
+    SDL_Renderer* renderer = Game::GetInstance().GetRenderer();
+
+    int heartSize = 32;  // Tamanho do coração
+    int spacing = 4;     // Espaço entre os corações
+    int startX = 20;
+    int startY = 20;
+
+    for (int i = 0; i < hp ; ++i) {  // Supondo que cada coração representa 10 de HP
+        SDL_Rect dst;
+        dst.x = startX + i * (heartSize + spacing);
+        dst.y = startY;
+        dst.w = heartSize;
+        dst.h = heartSize;
+        SDL_RenderCopy(renderer, heartTex, nullptr, &dst);
+    }
+}
 
 bool Character::Is(std::string type) const {
     return type == "Character";
@@ -172,14 +193,14 @@ void Character::NotifyCollision(GameObject& other) {
         if (bullet->targetsPlayer) {
             if (isPlayer) {
                 if (damageCooldown.Get() > 0.5f) {
-                    TakeDamage(10);
+                    TakeDamage(1);
                     damageCooldown.Restart();
                 }
             }
         } else {
             if (!isPlayer) {
                 if (damageCooldown.Get() > 0.5f) {
-                    TakeDamage(10);
+                    TakeDamage(1);
                     damageCooldown.Restart();
                 }
             }
@@ -190,7 +211,7 @@ void Character::NotifyCollision(GameObject& other) {
     if (other.GetComponent("Zombie") != nullptr) {
         if (isPlayer){
             if (damageCooldown.Get() > 0.5f) {
-            TakeDamage(10);
+            TakeDamage(1);
             damageCooldown.Restart();
             }
         }

@@ -7,6 +7,7 @@
 #include "Collider.h"
 #include <cmath>
 #include <Character.h>
+#include "Boss.h"
 
 Bullet::Bullet(GameObject& associated, float angle, float speed, int damage, float maxDistance, bool targetsPlayer)
     : Component(associated){
@@ -30,6 +31,10 @@ void Bullet::Update(float dt) {
         return;
     }
 
+    // Faz o bullet girar no próprio eixo
+    associated.angleDeg += 360 * dt; // 360 graus por segundo (ajuste como quiser)
+
+    // Movimento
     Vec2 position = Vec2(associated.box.x, associated.box.y);
     position += speed * dt;
     associated.box.x = position.x;
@@ -37,6 +42,7 @@ void Bullet::Update(float dt) {
 
     distanceLeft -= speed.Magnitude() * dt;
 }
+
 
 void Bullet::Render() {}
 
@@ -62,5 +68,10 @@ void Bullet::NotifyCollision(GameObject& other) {
                 associated.RequestDelete();
             }
         }
+    }
+    if (other.GetComponent("Boss") != nullptr) {
+        Boss* boss = (Boss*) other.GetComponent("Boss");
+        if (!targetsPlayer )
+        associated.RequestDelete();
     }
 }

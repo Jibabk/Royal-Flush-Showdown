@@ -28,6 +28,7 @@ public:
         Command(CommandType type, float x, float y): type(type), pos(x, y){}
     };
 
+    static Boss* chefe;
     void Issue(Command task);
 
     void TakeDamage(int damage);
@@ -45,6 +46,8 @@ private:
     Vec2 speed;
     float linearSpeed;
     int hp;
+    int currentHp;
+    int maxHp;
     Timer deathTimer;
     Timer damageCooldown;
     bool facingLeft = false;

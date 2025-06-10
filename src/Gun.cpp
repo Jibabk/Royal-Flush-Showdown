@@ -93,7 +93,7 @@ void Gun::Shoot(Vec2 target) {
     bulletGO->box.y = associated.box.y + associated.box.h / 2 - 5; // centraliza a bala
     bulletGO->AddComponent(new SpriteRenderer(*bulletGO, "Recursos/img/cartinha.png", 3, 2));
     bulletGO->AddComponent(new Animator(*bulletGO));
-    bulletGO->AddComponent(new Bullet(*bulletGO, angle, 1000, 10, 500,targetsPlayer)); // velocidade, dano, distância máxima
+    bulletGO->AddComponent(new Bullet(*bulletGO, angle, 500, 10, 1000,targetsPlayer)); // velocidade, dano, distância máxima
     state.AddObject(bulletGO);  // adiciona a bala ao estado
     reloadSound.Play(1);  // toca som de recarga
 }

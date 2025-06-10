@@ -15,7 +15,7 @@ WaveSpawner* WaveSpawner::quest = nullptr;
 WaveSpawner::WaveSpawner(GameObject& associated)
     : Component(associated), zombieCounter(0),npcCounter(0), currentWave(0) {
     // Definindo algumas waves
-    waves.emplace_back(2,1, 1.0f);  // 5 zumbis, spawn a cada 1s
+    //waves.emplace_back(2,1, 1.0f);  // 5 zumbis, spawn a cada 1s
     //waves.emplace_back(2,2, 0.8f);
     //waves.emplace_back(3,2, 0.6f);
     //waves.emplace_back(3,3, 0.5f);

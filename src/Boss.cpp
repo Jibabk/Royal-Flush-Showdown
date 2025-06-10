@@ -11,9 +11,10 @@
 #include <Bullet.h>
 #include <Character.h>
 
+Boss* Boss::chefe = nullptr;
 
 Boss::Boss(GameObject& associated, std::string sprite)
-    : Component(associated), speed(0, 0), linearSpeed(0), hp(100), 
+    : Component(associated), speed(0, 0), linearSpeed(0), hp(100), maxHp(100), currentHp(100),
       deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav") {
 
     
@@ -29,11 +30,18 @@ Boss::Boss(GameObject& associated, std::string sprite)
     animator->AddAnimation("idle", Animation(0, 0, 9, SDL_FLIP_NONE));
     animator->SetAnimation("idle");
     associated.AddComponent(animator);
+
+    if (!chefe)
+        chefe = this;
+
     
 }
 
 Boss::~Boss() {
-    // destrutor vazio
+    if (chefe == this) {
+        chefe = nullptr;
+    }
+
 }
 
 void Boss::Start() {
@@ -140,14 +148,50 @@ void Boss::Update(float dt) {
     
 }
 
-void Boss::Render() {}
+void Boss::Render() {
+    if (currentHp < maxHp) {
+        SDL_Rect barBackground;
+        SDL_Rect barFill;
+
+        // Tamanho da barra
+        int barWidth = associated.box.w;
+        int barHeight = 8;
+        int offsetY = 10;
+
+        // Ajuste de posição com base na câmera
+        int screenX = associated.box.x - Camera::pos.x;
+        int screenY = associated.box.y - Camera::pos.y - offsetY;
+
+        // Retângulo de fundo (vermelho)
+        barBackground.x = screenX;
+        barBackground.y = screenY;
+        barBackground.w = barWidth;
+        barBackground.h = barHeight;
+
+        // Retângulo de preenchimento (verde)
+        barFill = barBackground;
+        barFill.w = static_cast<int>((float)hp / maxHp * barWidth);
+
+        SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255, 0, 0, 255); // vermelho
+        SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &barBackground);
+
+        SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 0, 255, 0, 255); // verde
+        SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &barFill);
+    }
+}
+
 
 bool Boss::Is(std::string type) const {
     return type == "Boss";
 }
 
 void Boss::NotifyCollision(GameObject& other) {
-
+    if (other.GetComponent("Bullet") != nullptr) {
+        Bullet* bullet = (Bullet*)other.GetComponent("Bullet");
+        if (!bullet->targetsPlayer) {
+            TakeDamage(10);
+        }
+    }
 }
 
 void Boss::Issue(Command task) {
@@ -159,6 +203,7 @@ void Boss::TakeDamage(int damage) {
         return; // Já está morto ou não pode receber dano
     }
     hp -= damage;
+    currentHp = hp; // <-- Adicione isso
     hitSound.Play(1);
     //std::cout << "[Boss] Took damage. HP: " << hp << std::endl;
 
