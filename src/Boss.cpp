@@ -20,7 +20,7 @@ Boss::Boss(GameObject& associated, std::string sprite)
     
     SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 1, 1);
     associated.AddComponent(new Collider(associated));
-    spriteRenderer->SetScale(1,1); // Ajusta o tamanho do sprite
+    spriteRenderer->SetScale(4,4); // Ajusta o tamanho do sprite
     associated.AddComponent(spriteRenderer);
 
     associated.box.w = spriteRenderer->GetWidth();

@@ -66,11 +66,11 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
         Card card = deck.Draw();
 
         GameObject* cardGO = new GameObject();
-        cardGO->box.x = 900 + i * 200; // espaçamento entre cartas
-        cardGO->box.y = 1300; // posição vertical
+        cardGO->box.x = 1200 + i * 150; // espaçamento entre cartas
+        cardGO->box.y = 1500; // posição vertical
 
         SpriteRenderer* renderer = new SpriteRenderer(*cardGO, card.GetImagePath(), 1, 1);
-        renderer->SetScale(0.1, 0.1);  // dobra o tamanho da carta
+        renderer->SetScale(0.05, 0.05);  // dobra o tamanho da carta
         cardGO->AddComponent(renderer);
 
         AddObject(cardGO);  // se estiver dentro de StageState
