@@ -19,7 +19,8 @@ Character::Character(GameObject& associated, std::string sprite)
       deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav") {
 
     
-    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 3, 4);
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 4, 3);
+    spriteRenderer->SetScale(2,2);
     associated.AddComponent(new Collider(associated));
     associated.AddComponent(spriteRenderer);
 
@@ -54,12 +55,12 @@ Character::~Character() {
 void Character::Start() {
     auto& state = Game::GetInstance().GetCurrentState();
 
-    GameObject* gunGO = new GameObject();
-    gunGO->box = associated.box;
+    //GameObject* gunGO = new GameObject();
+    //gunGO->box = associated.box;
 
-    gunGO->AddComponent(new Gun(*gunGO, state.GetObjectPtr(&associated)));
+    //gunGO->AddComponent(new Gun(*gunGO, state.GetObjectPtr(&associated)));
 
-    gun = state.AddObject(gunGO);  // Guarda o weak_ptr
+    //gun = state.AddObject(gunGO);  // Guarda o weak_ptr
     
 }
 
@@ -93,7 +94,7 @@ void Character::Update(float dt) {
 
         if (cmd.type == Command::MOVE) {
             speed = (cmd.pos - associated.box.Center()).Normalized();
-            linearSpeed = 2000;
+            linearSpeed = 4000;
         } else if (cmd.type == Command::SHOOT) { //VERIFICAR
             auto gunPtr = gun.lock();
             if (!gunPtr) {
@@ -120,8 +121,8 @@ void Character::Update(float dt) {
     const float mapEndX = 640 + 1280;
     const float mapEndY = 512 + 1536;
 
-    associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
-    associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
+    //associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
+    //associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
 
 
     // Atualizar animação

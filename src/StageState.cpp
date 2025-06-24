@@ -22,35 +22,48 @@
 StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     // Background
     GameObject* bg = new GameObject();
-    SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/Background.png");
+    SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/background1.png");
+    bgRenderer->SetScale(2, 2);
     bgRenderer->SetCameraFollower(true);
     bg->AddComponent(bgRenderer);
     AddObject(bg);
 
+    // Arena
+    //GameObject* arena = new GameObject();
+    //SpriteRenderer* arenaRenderer = new SpriteRenderer(*arena, "Recursos/img/arena.png");
+    //arena-> box.x = 160;
+    //arena-> box.y = 340;
+    //arenaRenderer->SetScale(2, 2);
+    //arenaRenderer->SetCameraFollower(true);
+    //arena->AddComponent(arenaRenderer);
+    //AddObject(arena);
+
+
+
     // TileSet e TileMap
-    tileSet = new TileSet(64, 64, "Recursos/img/Tileset.png");
-    GameObject* mapGO = new GameObject();
-    TileMap* tileMap = new TileMap(*mapGO, "Recursos/map/map.txt", tileSet);
-    mapGO->AddComponent(tileMap);
-    AddObject(mapGO);
+    //tileSet = new TileSet(64, 64, "Recursos/img/Tileset.png");
+    //GameObject* mapGO = new GameObject();
+    //TileMap* tileMap = new TileMap(*mapGO, "Recursos/map/map.txt", tileSet);
+    ///mapGO->AddComponent(tileMap);
+    //AddObject(mapGO);
 
     // Personagem (Player)
     GameObject* playerGO = new GameObject();
-    playerGO->box.x = 1280;
-    playerGO->box.y = 1280;
-    playerGO->AddComponent(new Character(*playerGO, "Recursos/img/Player.png"));
+    playerGO->box.x = 360;
+    playerGO->box.y = 480;
+    playerGO->AddComponent(new Character(*playerGO, "Recursos/img/protag_spritesheet.png"));
     playerGO->AddComponent(new PlayerController(*playerGO));
     AddObject(playerGO);
     //Camera::Follow(playerGO);
 
     // Chefão (Boss)
     GameObject* BossGO = new GameObject();
-    BossGO->box.x = 1380;
-    BossGO->box.y = 1380;
-    BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/reiSprite.png"));
+    BossGO->box.x = 0;
+    BossGO->box.y = 0;
+    BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/boss_v2.png"));
     BossGO->AddComponent(new BossAiController(*BossGO));
     AddObject(BossGO);
-    Camera::Follow(BossGO);
+    //Camera::Follow(BossGO);
 
 
     // Spawner
@@ -66,8 +79,8 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
         Card card = deck.Draw();
 
         GameObject* cardGO = new GameObject();
-        cardGO->box.x = 1200 + i * 150; // espaçamento entre cartas
-        cardGO->box.y = 1500; // posição vertical
+        cardGO->box.x = 100 + i * 150; // espaçamento entre cartas
+        cardGO->box.y = 600; // posição vertical
 
         SpriteRenderer* renderer = new SpriteRenderer(*cardGO, card.GetImagePath(), 1, 1);
         renderer->SetScale(1, 1);  // dobra o tamanho da carta
