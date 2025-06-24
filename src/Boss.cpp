@@ -18,7 +18,7 @@ Boss::Boss(GameObject& associated, std::string sprite)
       deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav") {
 
     
-    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 1, 1);
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 2, 1);
     associated.AddComponent(new Collider(associated));
     spriteRenderer->SetScale(1,1); // Ajusta o tamanho do sprite
     associated.AddComponent(spriteRenderer);
@@ -112,8 +112,8 @@ void Boss::Update(float dt) {
     const float mapEndX = 640 + 1280;
     const float mapEndY = 512 + 1536;
 
-    associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
-    associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
+    //associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
+    //associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
 
 
     // Atualizar animação

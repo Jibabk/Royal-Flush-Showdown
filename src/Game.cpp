@@ -84,7 +84,7 @@ Game::~Game() {
 
 Game& Game::GetInstance() {
     if (instance == nullptr) {
-        instance = new Game("Wave Survival", 1200, 900);
+        instance = new Game("Royal Flush Showdown", 960, 720);
     }
     return *instance;
 }
