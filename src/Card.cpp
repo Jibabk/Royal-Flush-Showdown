@@ -40,6 +40,6 @@ std::string Card::GetImagePath() const {
         case ESPADILHA:   suitChar = "E"; break;
     }
 
-    return "Recursos/img/cards/2C.png"; //return "Recursos/img/cards/" + rankStr + suitChar + ".png";
+    return "Recursos/img/cards/" + rankStr + suitChar + ".png";
 }
 
