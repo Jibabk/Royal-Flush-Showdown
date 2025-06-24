@@ -1,5 +1,5 @@
-#ifndef CHARACTER_H
-#define CHARACTER_H
+#ifndef BOSS_H
+#define BOSS_H
 
 #include <queue>
 #include <memory>
@@ -7,12 +7,11 @@
 #include "Vec2.h"
 #include "Timer.h"
 #include "Sound.h"
-#include "SDL_include.h"
 
-class Character : public Component {
+class Boss : public Component {
 public:
-    Character(GameObject& associated, std::string sprite);
-    ~Character();
+    Boss(GameObject& associated, std::string sprite);
+    ~Boss();
 
     void Start() override;
     void Update(float dt) override;
@@ -29,9 +28,8 @@ public:
         Command(CommandType type, float x, float y): type(type), pos(x, y){}
     };
 
+    static Boss* chefe;
     void Issue(Command task);
-
-    static Character* player;
 
     void TakeDamage(int damage);
     bool IsDead() const { return isDead; }
@@ -41,7 +39,6 @@ public:
         linearSpeed = speed.Magnitude();
     }
 
-    static int npcCount;
 
 private:
     std::weak_ptr<GameObject> gun;
@@ -49,6 +46,8 @@ private:
     Vec2 speed;
     float linearSpeed;
     int hp;
+    int currentHp;
+    int maxHp;
     Timer deathTimer;
     Timer damageCooldown;
     bool facingLeft = false;

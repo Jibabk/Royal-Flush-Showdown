@@ -30,7 +30,7 @@ void Zombie::Damage(int damage) {
      if (hitpoints > 0) {
         hitSound.Play(1); // Toca som de impacto sempre que tomar dano
         hitpoints -= damage;
-        std::cout << "Zumbi tomou " << damage << " de dano! HP restante: " << hitpoints << std::endl;
+        //std::cout << "Zumbi tomou " << damage << " de dano! HP restante: " << hitpoints << std::endl;
     }
 }
 

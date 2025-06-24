@@ -7,13 +7,17 @@
 #include "Collider.h"
 #include <cmath>
 #include <Character.h>
+#include "Boss.h"
 
 Bullet::Bullet(GameObject& associated, float angle, float speed, int damage, float maxDistance, bool targetsPlayer)
     : Component(associated){
 
     associated.angleDeg = angle;
-    associated.AddComponent(new SpriteRenderer(associated, "Recursos/img/Bullet.png", 3, 2));
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/cartinha.png", 1, 1);
     associated.AddComponent(new Collider(associated));
+    spriteRenderer->SetScale(1,1);
+    associated.AddComponent(spriteRenderer);
+    
     Vec2 direction(0, 0);
     this->speed = Vec2(std::cos(angle * M_PI / 180.0f), std::sin(angle * M_PI / 180.0f)) * speed;
     this->damage = damage;
@@ -27,6 +31,10 @@ void Bullet::Update(float dt) {
         return;
     }
 
+    // Faz o bullet girar no próprio eixo
+    associated.angleDeg += 360 * dt; // 360 graus por segundo (ajuste como quiser)
+
+    // Movimento
     Vec2 position = Vec2(associated.box.x, associated.box.y);
     position += speed * dt;
     associated.box.x = position.x;
@@ -34,6 +42,7 @@ void Bullet::Update(float dt) {
 
     distanceLeft -= speed.Magnitude() * dt;
 }
+
 
 void Bullet::Render() {}
 
@@ -59,5 +68,10 @@ void Bullet::NotifyCollision(GameObject& other) {
                 associated.RequestDelete();
             }
         }
+    }
+    if (other.GetComponent("Boss") != nullptr) {
+        Boss* boss = (Boss*) other.GetComponent("Boss");
+        if (!targetsPlayer )
+        associated.RequestDelete();
     }
 }

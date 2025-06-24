@@ -69,12 +69,12 @@ void Sprite::SetFrameCount(int frameCountW, int frameCountH) {
 }
 
 void Sprite::Render(int x, int y,float angle=0) {
-    SDL_Rect dstRect = { x, y, clipRect.w, clipRect.h };
+    SDL_Rect dstRect = { x, y, clipRect.w * scale.x, clipRect.h * scale.y };
     SDL_RenderCopyEx(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect ,angle, nullptr, flip);
 }
 
 void Sprite::Render(int x, int y, int w, int h, float angle=0) {
-    SDL_Rect dstRect = { x * scale.x, y * scale.y, w, h };
+    SDL_Rect dstRect = { x, y, w * scale.x, h * scale.y };
     SDL_RenderCopyEx(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect ,angle, nullptr, flip);
 }
 

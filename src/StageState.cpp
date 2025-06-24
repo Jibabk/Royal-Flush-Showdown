@@ -14,6 +14,10 @@
 #include <iostream>
 #include <GameData.h>
 #include "EndState.h"
+#include "Boss.h"
+#include "BossAiController.h"
+#include <Deck.h>
+#include <Card.h>
 
 StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     // Background
@@ -37,12 +41,41 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     playerGO->AddComponent(new Character(*playerGO, "Recursos/img/Player.png"));
     playerGO->AddComponent(new PlayerController(*playerGO));
     AddObject(playerGO);
-    Camera::Follow(playerGO);
+    //Camera::Follow(playerGO);
+
+    // Chefão (Boss)
+    GameObject* BossGO = new GameObject();
+    BossGO->box.x = 1380;
+    BossGO->box.y = 1380;
+    BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/reiSprite.png"));
+    BossGO->AddComponent(new BossAiController(*BossGO));
+    AddObject(BossGO);
+    Camera::Follow(BossGO);
+
 
     // Spawner
     GameObject* spawnerGO = new GameObject();
     spawnerGO->AddComponent(new WaveSpawner(*spawnerGO));
     AddObject(spawnerGO);
+
+    // Dentro de algum State, por exemplo StageState
+
+    Deck deck;
+
+    for (int i = 0; i < 5; i++) {
+        Card card = deck.Draw();
+
+        GameObject* cardGO = new GameObject();
+        cardGO->box.x = 900 + i * 200; // espaçamento entre cartas
+        cardGO->box.y = 1300; // posição vertical
+
+        SpriteRenderer* renderer = new SpriteRenderer(*cardGO, card.GetImagePath(), 1, 1);
+        renderer->SetScale(0.1, 0.1);  // dobra o tamanho da carta
+        cardGO->AddComponent(renderer);
+
+        AddObject(cardGO);  // se estiver dentro de StageState
+    }
+
 
     backgroundMusic.Play();
 }
@@ -116,7 +149,7 @@ void StageState::Update(float dt) {
         popRequested = true;
         Game::GetInstance().Push(new EndState());
     }
-    if ((WaveSpawner::quest->GetZombieCount() == 0) && (WaveSpawner::quest->IsFinished())) { 
+    if (Boss::chefe == nullptr) { 
         GameData::playerVictory = true;
         popRequested = true;
         Game::GetInstance().Push(new EndState());
