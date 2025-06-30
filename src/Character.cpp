@@ -116,13 +116,13 @@ void Character::Update(float dt) {
     associated.box.x += speed.x * linearSpeed * dt;
     associated.box.y += speed.y * linearSpeed * dt;
 
-    const float mapStartX = 640;
-    const float mapStartY = 512;
-    const float mapEndX = 640 + 1280;
-    const float mapEndY = 512 + 1536;
+    const float mapStartX = 150;
+    const float mapStartY = 310;
+    const float mapEndX = 820;
+    const float mapEndY = 640;
 
-    //associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
-    //associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
+    associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
+    associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
 
 
     // Atualizar animação
