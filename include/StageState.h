@@ -5,7 +5,7 @@
 #include "TileSet.h"
 #include "Music.h"
 #include "Deck.h"
-
+#include "Timer.h"
 class StageState : public State {
 public:
     StageState();
@@ -18,6 +18,8 @@ public:
     void Pause() override;
     void Resume() override;
     void DeselectAllCards();
+    enum GameMode { CARD_MODE, ACTION_MODE };
+    GameMode GetCurrentMode() const { return currentMode; }
 
 private:
     TileSet* tileSet;
@@ -25,6 +27,10 @@ private:
     Sprite bg;
     Deck deck;
     std::vector<std::shared_ptr<GameObject>> cards;
+    GameMode currentMode;
+    Timer modeTimer;
+    float modeDuration = 10.0f; // tempo de duração de cada fase
+    bool cardsSpawned = false;
 
 };
 

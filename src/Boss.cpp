@@ -10,6 +10,7 @@
 #include <Collider.h>
 #include <Bullet.h>
 #include <Character.h>
+#include <StageState.h>
 
 Boss* Boss::chefe = nullptr;
 
@@ -27,8 +28,9 @@ Boss::Boss(GameObject& associated, std::string sprite)
     associated.box.h = spriteRenderer->GetHeight();
 
     Animator* animator = new Animator(associated);
-    animator->AddAnimation("idle", Animation(0, 0, 9, SDL_FLIP_NONE));
-    animator->SetAnimation("idle");
+    animator->AddAnimation("actionIdle", Animation(0, 0, 9, SDL_FLIP_NONE));
+    animator->AddAnimation("cardIdle", Animation(1, 1, 9, SDL_FLIP_NONE));
+    animator->SetAnimation("cardIdle");
     associated.AddComponent(animator);
 
     if (!chefe)
@@ -59,7 +61,10 @@ void Boss::Start() {
 
 void Boss::Update(float dt) {
     Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+    auto& state = Game::GetInstance().GetCurrentState();
+    StageState* stage = dynamic_cast<StageState*>(&state);
 
+    
     damageCooldown.Update(dt);
     if (hp <= 0) {
         auto gunPtr = gun.lock();
@@ -79,6 +84,16 @@ void Boss::Update(float dt) {
     }
 
     // Executar comandos pendentes
+    if(stage->GetCurrentMode() == StageState::CARD_MODE) {
+        // Se estiver no modo de cartas, não atualiza o Boss
+        if (animator) {
+            animator->SetAnimation("cardIdle");
+        }
+        speed = Vec2(0, 0);
+        linearSpeed = 0;
+        return;
+    }else{
+
     while (!taskQueue.empty() && !isDead) {
         Command cmd = taskQueue.front();
         taskQueue.pop();
@@ -101,6 +116,7 @@ void Boss::Update(float dt) {
             }
 
         }
+    }
     }
 
     // Movimento
@@ -135,7 +151,7 @@ void Boss::Update(float dt) {
         if (this->facingLeft) {
             //animator->SetAnimation("idle_left");
         } else
-        animator->SetAnimation("idle");
+        animator->SetAnimation("actionIdle");
         
     }
 
