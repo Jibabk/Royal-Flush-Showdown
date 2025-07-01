@@ -67,7 +67,7 @@ void Character::Start() {
 
 void Character::Update(float dt) {
     Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
-
+    walkTimer.Update(dt);
 
     damageCooldown.Update(dt);
     if (hp <= 0) {
@@ -103,6 +103,7 @@ void Character::Update(float dt) {
         if (std::abs(direction.x) > std::abs(direction.y)) {
             // Movimento horizontal
             speed = Vec2((direction.x > 0) ? 1 : -1, 0);
+            facingLeft = speed.x <0;
         } else {
             // Movimento vertical
             speed = Vec2(0, (direction.y > 0) ? 1 : -1);
@@ -111,6 +112,8 @@ void Character::Update(float dt) {
         // Move imediatamente 1 tile (modo tabuleiro)
         associated.box.x += speed.x * tileWidth;
         associated.box.y += speed.y * tileHeight;
+
+        walkTimer.Restart();
 
         // Atualiza o animator
         Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
@@ -149,29 +152,19 @@ void Character::Update(float dt) {
     associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
     associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
 
-
-    // Atualizar animação
-    if (speed.Magnitude() > 0.1f) {
-        if (speed.x < -0.1f) {
+    // Animação baseada no temporizador de caminhada
+    if (walkTimer.Get() < 0.2f) {
+        if (facingLeft)
             animator->SetAnimation("walking_left");
-            this->facingLeft = true;
-        } else if (speed.x > 0.1f) {
+        else
             animator->SetAnimation("walking");
-            this->facingLeft = false;
-        } else {
-            if (this->facingLeft) {
-                animator->SetAnimation("walking_left");
-            } else {
-                animator->SetAnimation("walking");
-            }
-        }
     } else {
-        if (this->facingLeft) {
+        if (facingLeft)
             animator->SetAnimation("idle_left");
-        } else
-        animator->SetAnimation("idle");
-        
+        else
+            animator->SetAnimation("idle");
     }
+
 
     
 

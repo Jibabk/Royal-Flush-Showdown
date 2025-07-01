@@ -55,6 +55,7 @@ private:
     bool isDead = false;
     Sound deathSound;
     Sound hitSound;
+    Timer walkTimer;
 };
 
 #endif
