@@ -51,7 +51,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()
 
     // Personagem (Player)
     GameObject* playerGO = new GameObject();
-    playerGO->box.x = 360;
+    playerGO->box.x = 320;
     playerGO->box.y = 480;
     playerGO->AddComponent(new Character(*playerGO, "Recursos/img/protag_spritesheet.png"));
     playerGO->AddComponent(new PlayerController(*playerGO));
