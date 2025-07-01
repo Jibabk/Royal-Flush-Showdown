@@ -93,8 +93,33 @@ void Character::Update(float dt) {
         taskQueue.pop();
 
         if (cmd.type == Command::MOVE) {
-            speed = (cmd.pos - associated.box.Center()).Normalized();
-            linearSpeed = 4000;
+            const float tileWidth = 80.0f; // tamanho do quadrado
+            const float tileHeight = 65.0f;
+
+        Vec2 current = associated.box.Center();
+        Vec2 direction = cmd.pos - current;
+
+        // Decide a direção do movimento com base no vetor direção
+        if (std::abs(direction.x) > std::abs(direction.y)) {
+            // Movimento horizontal
+            speed = Vec2((direction.x > 0) ? 1 : -1, 0);
+        } else {
+            // Movimento vertical
+            speed = Vec2(0, (direction.y > 0) ? 1 : -1);
+        }
+
+        // Move imediatamente 1 tile (modo tabuleiro)
+        associated.box.x += speed.x * tileWidth;
+        associated.box.y += speed.y * tileHeight;
+
+        // Atualiza o animator
+        Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+        if (speed.x < 0)
+            animator->SetAnimation("walking_left");
+        else if (speed.x > 0)
+            animator->SetAnimation("walking");
+        else
+            animator->SetAnimation(facingLeft ? "walking_left" : "walking");
         } else if (cmd.type == Command::SHOOT) { //VERIFICAR
             auto gunPtr = gun.lock();
             if (!gunPtr) {
@@ -113,13 +138,13 @@ void Character::Update(float dt) {
     }
 
     // Movimento
-    associated.box.x += speed.x * linearSpeed * dt;
-    associated.box.y += speed.y * linearSpeed * dt;
+    //associated.box.x += speed.x * linearSpeed * dt;
+    //associated.box.y += speed.y * linearSpeed * dt;
 
-    const float mapStartX = 150;
+    const float mapStartX = 160;
     const float mapStartY = 310;
-    const float mapEndX = 820;
-    const float mapEndY = 640;
+    const float mapEndX = 800;
+    const float mapEndY = 628;
 
     associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
     associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
