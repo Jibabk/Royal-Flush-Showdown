@@ -21,7 +21,7 @@ public:
     void NotifyCollision(GameObject& other) override;
     class Command {
     public:
-        enum CommandType { MOVE, SHOOT };
+        enum CommandType { MOVE, SHOOT_LEFT, SHOOT_RIGHT };
         CommandType type;
         Vec2 pos;
 
@@ -41,7 +41,8 @@ public:
 
 
 private:
-    std::weak_ptr<GameObject> gun;
+    std::weak_ptr<GameObject> gunLeft;
+    std::weak_ptr<GameObject> gunRight;
     std::queue<Command> taskQueue;
     Vec2 speed;
     float linearSpeed;
