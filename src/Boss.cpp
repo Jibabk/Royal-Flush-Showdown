@@ -49,12 +49,17 @@ Boss::~Boss() {
 void Boss::Start() {
     auto& state = Game::GetInstance().GetCurrentState();
 
-    GameObject* gunGO = new GameObject();
-    gunGO->box = associated.box;
 
-    gunGO->AddComponent(new Gun(*gunGO, state.GetObjectPtr(&associated)));
+    GameObject* gunGO1 = new GameObject();
+    gunGO1->box = associated.box;
+    gunGO1->AddComponent(new Gun(*gunGO1, state.GetObjectPtr(&associated),Vec2(-80, 20)));
+    gunLeft = state.AddObject(gunGO1);
 
-    gun = state.AddObject(gunGO);  // Guarda o weak_ptr
+    GameObject* gunGO2 = new GameObject();
+    gunGO2->box = associated.box;
+    gunGO2->AddComponent(new Gun(*gunGO2, state.GetObjectPtr(&associated),Vec2(80, 20)));
+    gunRight = state.AddObject(gunGO2);
+
     
 }
 
@@ -67,10 +72,15 @@ void Boss::Update(float dt) {
     
     damageCooldown.Update(dt);
     if (hp <= 0) {
-        auto gunPtr = gun.lock();
-        if (gunPtr) {
-            gunPtr->RequestDelete();
+        auto gunPtrL = gunLeft.lock();
+        auto gunPtrR = gunRight.lock();
+        if (gunPtrL) {
+            gunPtrL->RequestDelete();
         }
+        if (gunPtrR) {
+            gunPtrR->RequestDelete();
+        }
+
         isDead = true;
         //animator->SetAnimation("dead");
     }
@@ -101,23 +111,20 @@ void Boss::Update(float dt) {
         if (cmd.type == Command::MOVE) {
             speed = (cmd.pos - associated.box.Center()).Normalized();
             linearSpeed = 200;
-        } else if (cmd.type == Command::SHOOT) { //VERIFICAR
-            auto gunPtr = gun.lock();
-            if (!gunPtr) {
-                std::cerr << "[Boss] Gun pointer expired!\n";
-            } else {
-                Gun* gunComponent = (Gun*)gunPtr->GetComponent("Gun");
-                if (!gunComponent) {
-                    std::cerr << "[Boss] Gun component not found!\n";
-                } else {
-                    std::cerr << "[Boss] Shooting towards (" << cmd.pos.x << ", " << cmd.pos.y << ")\n";
-                    (gunComponent)->Shoot(cmd.pos);
-                }
+        } if (cmd.type == Command::SHOOT_LEFT) {
+            if (auto gunPtr = gunLeft.lock()) {
+                auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
+                if (gunComp) gunComp->Shoot(cmd.pos);
             }
-
+        } else if (cmd.type == Command::SHOOT_RIGHT) {
+            if (auto gunPtr = gunRight.lock()) {
+                auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
+                if (gunComp) gunComp->Shoot(cmd.pos);
+            }
         }
     }
     }
+
 
     // Movimento
     associated.box.x += speed.x * linearSpeed * dt;
