@@ -18,7 +18,14 @@ void Deck::Shuffle() {
 }
 
 Card Deck::Draw() {
-    if (IsEmpty()) throw std::runtime_error("Deck is empty!");
+    if (IsEmpty()) {
+        for (int s = 0; s < 4; ++s) {
+            for (int r = 2; r <= 14; ++r) {
+                cards.emplace_back(static_cast<Card::Suit>(s), static_cast<Card::Rank>(r));
+            }
+        }
+        Shuffle();
+    };
     return cards[currentIndex++];
 }
 

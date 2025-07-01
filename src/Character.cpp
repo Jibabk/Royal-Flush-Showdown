@@ -28,10 +28,10 @@ Character::Character(GameObject& associated, std::string sprite)
     associated.box.h = spriteRenderer->GetHeight();
 
     Animator* animator = new Animator(associated);
-    animator->AddAnimation("idle", Animation(6, 9, 9, SDL_FLIP_NONE));
-    animator->AddAnimation("idle_left", Animation(6, 9, 9, SDL_FLIP_HORIZONTAL));
-    animator->AddAnimation("walking", Animation(0, 5, 3, SDL_FLIP_NONE));
-    animator->AddAnimation("walking_left", Animation(0, 5, 3, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("idle", Animation(0, 2, 9, SDL_FLIP_NONE));
+    animator->AddAnimation("idle_left", Animation(0, 2, 9, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("walking", Animation(8, 11, 3, SDL_FLIP_NONE));
+    animator->AddAnimation("walking_left", Animation(8, 11, 3, SDL_FLIP_HORIZONTAL));
     animator->AddAnimation("dead", Animation(10, 11, 12,SDL_FLIP_NONE));
     animator->SetAnimation("idle");
     associated.AddComponent(animator);

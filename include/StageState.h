@@ -4,6 +4,7 @@
 #include "State.h"
 #include "TileSet.h"
 #include "Music.h"
+#include "Deck.h"
 
 class StageState : public State {
 public:
@@ -16,11 +17,15 @@ public:
     void Start() override;
     void Pause() override;
     void Resume() override;
+    void DeselectAllCards();
 
 private:
     TileSet* tileSet;
     Music backgroundMusic;
     Sprite bg;
+    Deck deck;
+    std::vector<std::shared_ptr<GameObject>> cards;
+
 };
 
 #endif // STAGESTATE_H
