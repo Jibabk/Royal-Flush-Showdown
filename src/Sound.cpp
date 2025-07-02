@@ -1,5 +1,6 @@
 #include "Sound.h"
 #include <iostream>
+#define INCLUDE_SDL_MIXER
 
 Sound::Sound() : chunk(nullptr),channel(-1) {}
 
@@ -11,6 +12,14 @@ Sound::~Sound() {
     if (chunk != nullptr) {
         //Stop();
         Mix_FreeChunk(chunk);
+    }
+}
+
+void Sound::SetVolume(int volume) {
+    if (chunk != nullptr) {
+        if (volume < 0) volume = 0;
+        if (volume > MIX_MAX_VOLUME) volume = MIX_MAX_VOLUME;
+        Mix_VolumeChunk(chunk, volume);
     }
 }
 

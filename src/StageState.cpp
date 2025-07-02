@@ -25,6 +25,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()
     // Background
     GameObject* bg = new GameObject();
     SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/background1.png");
+    
     bgRenderer->SetScale(2, 2);
     bgRenderer->SetCameraFollower(true);
     bg->AddComponent(bgRenderer);
@@ -79,7 +80,8 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()
 
 
 
-    backgroundMusic.Play();
+    backgroundMusic.SetVolume(128); // Define o volume da música para 100%, volume de 0 a 128
+    backgroundMusic.Play(); // Toca a música em loop
 }
 
 StageState::~StageState() {

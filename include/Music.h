@@ -13,7 +13,8 @@ public:
     Music();                            // Construtor padrão
     Music(const std::string file);     // Construtor com arquivo
     ~Music();                           // Destrutor
-
+    
+    void SetVolume(int volume); // volume de 0 a 128
     void Play(int times = -1);          // Reproduz a música (loop infinito por padrão)
     void Stop(int msToStop = 1500);     // Para a música com fade-out
     void Open(const std::string file); // Carrega a música do arquivo
