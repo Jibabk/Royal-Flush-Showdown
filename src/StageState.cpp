@@ -16,10 +16,12 @@
 #include "EndState.h"
 #include "Boss.h"
 #include "BossAiController.h"
+#include "CardComponent.h"
 #include <Deck.h>
 #include <Card.h>
+#include <PokerHand.h>
 
-StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
+StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()),cards() {
     // Background
     GameObject* bg = new GameObject();
     SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/background1.png");
@@ -27,6 +29,9 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     bgRenderer->SetCameraFollower(true);
     bg->AddComponent(bgRenderer);
     AddObject(bg);
+    currentMode = CARD_MODE;
+    modeTimer.Restart();
+
 
     // Arena
     //GameObject* arena = new GameObject();
@@ -49,7 +54,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
 
     // Personagem (Player)
     GameObject* playerGO = new GameObject();
-    playerGO->box.x = 360;
+    playerGO->box.x = 320;
     playerGO->box.y = 480;
     playerGO->AddComponent(new Character(*playerGO, "Recursos/img/protag_spritesheet.png"));
     playerGO->AddComponent(new PlayerController(*playerGO));
@@ -58,8 +63,8 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
 
     // Chefão (Boss)
     GameObject* BossGO = new GameObject();
-    BossGO->box.x = 0;
-    BossGO->box.y = 0;
+    BossGO->box.x = 360;
+    BossGO->box.y = 50;
     BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/boss_v2.png"));
     BossGO->AddComponent(new BossAiController(*BossGO));
     AddObject(BossGO);
@@ -71,23 +76,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav") {
     spawnerGO->AddComponent(new WaveSpawner(*spawnerGO));
     AddObject(spawnerGO);
 
-    // Dentro de algum State, por exemplo StageState
 
-    Deck deck;
-
-    for (int i = 0; i < 5; i++) {
-        Card card = deck.Draw();
-
-        GameObject* cardGO = new GameObject();
-        cardGO->box.x = 100 + i * 150; // espaçamento entre cartas
-        cardGO->box.y = 600; // posição vertical
-
-        SpriteRenderer* renderer = new SpriteRenderer(*cardGO, card.GetImagePath(), 1, 1);
-        renderer->SetScale(1, 1);  // dobra o tamanho da carta
-        cardGO->AddComponent(renderer);
-
-        AddObject(cardGO);  // se estiver dentro de StageState
-    }
 
 
     backgroundMusic.Play();
@@ -112,6 +101,60 @@ void StageState::Pause() {}
 void StageState::Resume() {}
 
 void StageState::Update(float dt) {
+
+    modeTimer.Update(dt);
+
+    if (modeTimer.Get() > modeDuration) {
+        if (currentMode == CARD_MODE) {
+            currentMode = ACTION_MODE;
+            std::cout << "[MODO] Ação iniciada!" << std::endl;
+        } else {
+            currentMode = CARD_MODE;
+            std::cout << "[MODO] Cartas iniciada!" << std::endl;
+        }
+
+        modeTimer.Restart();
+    }
+
+    if (currentMode == CARD_MODE && !cardsSpawned) {
+        cards.clear();
+
+        for (int i = 0; i < 5; i++) {
+            Card card = deck.Draw();
+            GameObject* cardGO = new GameObject();
+            cardGO->box.x = 100 + i * 150;
+            cardGO->box.y = 800;
+            
+
+            SpriteRenderer* renderer = new SpriteRenderer(*cardGO, card.GetImagePath(), 1, 1);
+            renderer->SetScale(1, 1);
+            cardGO->AddComponent(renderer);
+
+            CardComponent* cardComp = new CardComponent(*cardGO, card);
+            cardComp->selected = true;  // Inicialmente não selecionada
+            cardGO->AddComponent(cardComp);
+
+            std::weak_ptr<GameObject> weak = AddObject(cardGO);
+            if (auto shared = weak.lock()) {
+                cards.push_back(shared);
+            }
+        }
+
+        cardsSpawned = true;
+    }
+
+    if (currentMode == ACTION_MODE) {
+        std::cout << "[MODO] Ação iniciada!" << std::endl;
+
+        // Remove cartas
+        for (auto& card : cards) {
+            if (card) card->RequestDelete();
+        }
+        cards.clear();
+        cardsSpawned = false;
+    }
+
+
     
     InputManager& input = InputManager::GetInstance();
 
@@ -120,13 +163,71 @@ void StageState::Update(float dt) {
         popRequested = true;
     }
 
-    if (input.KeyPress(SDLK_SPACE)) {
-        GameObject* zombie = new GameObject();
-        zombie->box.x = input.GetMouseX() + Camera::pos.x;
-        zombie->box.y = input.GetMouseY() + Camera::pos.y;
-        zombie->AddComponent(new Zombie(*zombie));
-        AddObject(zombie);
+    //if (input.KeyPress(SDLK_SPACE)) {
+    //    GameObject* zombie = new GameObject();
+    //    zombie->box.x = input.GetMouseX() + Camera::pos.x;
+    //    zombie->box.y = input.GetMouseY() + Camera::pos.y;
+    //    zombie->AddComponent(new Zombie(*zombie));
+    //    AddObject(zombie);
+    //}
+
+    // ENTER -> selecionar tudo e avaliar
+    if (input.KeyPress(SDLK_RETURN)) {
+        std::vector<Card> selectedCards;
+        for (int i=0; i < cards.size(); i++) {
+            auto comp = (CardComponent*)cards[i]->GetComponent("CardComponent");
+            if (comp) {
+                //comp->selected = true;
+                selectedCards.push_back(comp->card);  // Supondo que você tenha o atributo 'card'
+            }
+        }
+
+        if (selectedCards.size() == 5) {
+            PokerHand hand(selectedCards);
+            PokerHand::HandRank result = hand.Evaluate(hand);
+            std::cout << "[Poker] Mão avaliada: " << PokerHand::ToString(result) << std::endl;
+            // Aplica dano ao Boss
+            int damage = PokerHand::PokerHandToDamage(result);
+            if (Boss::chefe) {
+                Boss::chefe->TakeDamage(damage);
+                std::cout << "[Boss] Recebeu " << damage << " de dano!\n";
+            }
+        }
+
+        currentMode = ACTION_MODE;
+        modeTimer.Restart();
+        std::cout << "[MODO] Ação iniciada!" << std::endl;
     }
+
+    // X -> descartar a carta selecionada e comprar nova
+    if (input.KeyPress(SDLK_x)) {
+        for (size_t i = 0; i < cards.size(); ++i) {
+            auto comp = (CardComponent*)cards[i]->GetComponent("CardComponent");
+            if (comp && comp->selected) {
+                cards[i]->RequestDelete();
+
+               // Supõe que 'i' é o índice da carta a ser substituída
+                Card newCard = deck.Draw();
+                GameObject* newGO = new GameObject();
+                newGO->box = cards[i]->box;  // mantém a posição anterior
+
+                SpriteRenderer* renderer = new SpriteRenderer(*newGO, newCard.GetImagePath(), 1, 1);
+                renderer->SetScale(1, 1);
+                newGO->AddComponent(renderer);
+                newGO->AddComponent(new CardComponent(*newGO, newCard));
+
+                std::weak_ptr<GameObject> weak = AddObject(newGO);
+                if (auto shared = weak.lock()) {
+                    cards[i]->RequestDelete();  // descarta a anterior
+                    cards[i] = shared;          // substitui pela nova
+                }
+
+                break;  // só troca uma carta
+            }
+        }
+    }
+
+
 
     UpdateArray(dt);
 
@@ -173,4 +274,13 @@ void StageState::Update(float dt) {
 void StageState::Render() {
     bg.Render(0, 0, 0);
     RenderArray();
+}
+
+void StageState::DeselectAllCards() {
+    for (auto& card : cards) {
+        auto cardComp = (CardComponent*)card->GetComponent("CardComponent");
+        if (cardComp) {
+            cardComp->selected = false;
+        }
+    }
 }

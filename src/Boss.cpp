@@ -10,6 +10,7 @@
 #include <Collider.h>
 #include <Bullet.h>
 #include <Character.h>
+#include <StageState.h>
 
 Boss* Boss::chefe = nullptr;
 
@@ -27,8 +28,9 @@ Boss::Boss(GameObject& associated, std::string sprite)
     associated.box.h = spriteRenderer->GetHeight();
 
     Animator* animator = new Animator(associated);
-    animator->AddAnimation("idle", Animation(0, 0, 9, SDL_FLIP_NONE));
-    animator->SetAnimation("idle");
+    animator->AddAnimation("actionIdle", Animation(0, 0, 9, SDL_FLIP_NONE));
+    animator->AddAnimation("cardIdle", Animation(1, 1, 9, SDL_FLIP_NONE));
+    animator->SetAnimation("cardIdle");
     associated.AddComponent(animator);
 
     if (!chefe)
@@ -47,25 +49,38 @@ Boss::~Boss() {
 void Boss::Start() {
     auto& state = Game::GetInstance().GetCurrentState();
 
-    GameObject* gunGO = new GameObject();
-    gunGO->box = associated.box;
 
-    gunGO->AddComponent(new Gun(*gunGO, state.GetObjectPtr(&associated)));
+    GameObject* gunGO1 = new GameObject();
+    gunGO1->box = associated.box;
+    gunGO1->AddComponent(new Gun(*gunGO1, state.GetObjectPtr(&associated),Vec2(-80, 20)));
+    gunLeft = state.AddObject(gunGO1);
 
-    gun = state.AddObject(gunGO);  // Guarda o weak_ptr
+    GameObject* gunGO2 = new GameObject();
+    gunGO2->box = associated.box;
+    gunGO2->AddComponent(new Gun(*gunGO2, state.GetObjectPtr(&associated),Vec2(80, 20)));
+    gunRight = state.AddObject(gunGO2);
+
     
 }
 
 
 void Boss::Update(float dt) {
     Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+    auto& state = Game::GetInstance().GetCurrentState();
+    StageState* stage = dynamic_cast<StageState*>(&state);
 
+    
     damageCooldown.Update(dt);
     if (hp <= 0) {
-        auto gunPtr = gun.lock();
-        if (gunPtr) {
-            gunPtr->RequestDelete();
+        auto gunPtrL = gunLeft.lock();
+        auto gunPtrR = gunRight.lock();
+        if (gunPtrL) {
+            gunPtrL->RequestDelete();
         }
+        if (gunPtrR) {
+            gunPtrR->RequestDelete();
+        }
+
         isDead = true;
         //animator->SetAnimation("dead");
     }
@@ -79,6 +94,16 @@ void Boss::Update(float dt) {
     }
 
     // Executar comandos pendentes
+    if(stage->GetCurrentMode() == StageState::CARD_MODE) {
+        // Se estiver no modo de cartas, não atualiza o Boss
+        if (animator) {
+            animator->SetAnimation("cardIdle");
+        }
+        speed = Vec2(0, 0);
+        linearSpeed = 0;
+        return;
+    }else{
+
     while (!taskQueue.empty() && !isDead) {
         Command cmd = taskQueue.front();
         taskQueue.pop();
@@ -86,22 +111,20 @@ void Boss::Update(float dt) {
         if (cmd.type == Command::MOVE) {
             speed = (cmd.pos - associated.box.Center()).Normalized();
             linearSpeed = 200;
-        } else if (cmd.type == Command::SHOOT) { //VERIFICAR
-            auto gunPtr = gun.lock();
-            if (!gunPtr) {
-                std::cerr << "[Boss] Gun pointer expired!\n";
-            } else {
-                Gun* gunComponent = (Gun*)gunPtr->GetComponent("Gun");
-                if (!gunComponent) {
-                    std::cerr << "[Boss] Gun component not found!\n";
-                } else {
-                    std::cerr << "[Boss] Shooting towards (" << cmd.pos.x << ", " << cmd.pos.y << ")\n";
-                    (gunComponent)->Shoot(cmd.pos);
-                }
+        } if (cmd.type == Command::SHOOT_LEFT) {
+            if (auto gunPtr = gunLeft.lock()) {
+                auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
+                if (gunComp) gunComp->Shoot(cmd.pos);
             }
-
+        } else if (cmd.type == Command::SHOOT_RIGHT) {
+            if (auto gunPtr = gunRight.lock()) {
+                auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
+                if (gunComp) gunComp->Shoot(cmd.pos);
+            }
         }
     }
+    }
+
 
     // Movimento
     associated.box.x += speed.x * linearSpeed * dt;
@@ -135,7 +158,7 @@ void Boss::Update(float dt) {
         if (this->facingLeft) {
             //animator->SetAnimation("idle_left");
         } else
-        animator->SetAnimation("idle");
+        animator->SetAnimation("actionIdle");
         
     }
 

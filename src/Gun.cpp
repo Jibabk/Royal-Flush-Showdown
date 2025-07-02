@@ -10,13 +10,14 @@
 #include <iostream>
 #include <Character.h>
 
-Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character)
+Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relativeOffset)
     : Component(associated),
       shotSound("Recursos/audio/Range.wav"),
       reloadSound("Recursos/audio/PumpAction.mp3"),
       cooldown(800),  // milissegundos
       character(character),
-      angle(0) {
+      angle(0),
+      relativeOffset(relativeOffset) {
 
 
     associated.AddComponent(new SpriteRenderer(associated, "Recursos/img/Gun.png", 3, 2));
@@ -41,8 +42,9 @@ void Gun::Update(float dt) {
     cdTimer.Update(dt);
 
     Vec2 ownerCenter = Vec2(owner->box.x + owner->box.w / 2, owner->box.y + owner->box.h / 2);
-    associated.box.x = ownerCenter.x - associated.box.w / 2;
-    associated.box.y = ownerCenter.y - associated.box.h / 2;
+    associated.box.x = owner->box.Center().x + relativeOffset.x - associated.box.w / 2;
+    associated.box.y = owner->box.Center().y + relativeOffset.y - associated.box.h / 2;
+
 
     // deslocar levemente na direção do ângulo
     float offset = 20;

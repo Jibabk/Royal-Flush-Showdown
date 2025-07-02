@@ -32,8 +32,9 @@ void BossAiController::Update(float dt) {
     else if (state == MOVING) {
         Vec2 playerPos = Character::player->GetAssociated().box.Center();
         if (cpt != nullptr) {
-            static_cast<Boss*>(cpt)->Issue(
-            Boss::Command(Boss::Command::SHOOT, playerPos.x, playerPos.y));
+            static_cast<Boss*>(cpt)->Issue(Boss::Command(Boss::Command::SHOOT_LEFT, playerPos.x, playerPos.y));
+            static_cast<Boss*>(cpt)->Issue(Boss::Command(Boss::Command::SHOOT_RIGHT, playerPos.x, playerPos.y));
+            
         }
         restTimer.Restart();
         state = RESTING;
