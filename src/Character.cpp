@@ -68,6 +68,8 @@ void Character::Start() {
 void Character::Update(float dt) {
     Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
     walkTimer.Update(dt);
+    dashTimer.Update(dt);
+
 
     damageCooldown.Update(dt);
     if (hp <= 0) {
@@ -110,8 +112,15 @@ void Character::Update(float dt) {
         }
 
         // Move imediatamente 1 tile (modo tabuleiro)
-        associated.box.x += speed.x * tileWidth;
-        associated.box.y += speed.y * tileHeight;
+        //associated.box.x += speed.x * tileWidth;
+        //associated.box.y += speed.y * tileHeight;
+
+        //Personagem desliza
+        dashStartPos = associated.box.Pos();  // posição atual (top-left)
+        dashTargetPos = dashStartPos + Vec2(speed.x * tileWidth, speed.y * tileHeight);
+
+        isDashing = true;
+        dashTimer.Restart();
 
         walkTimer.Restart();
 
@@ -144,6 +153,18 @@ void Character::Update(float dt) {
     //associated.box.x += speed.x * linearSpeed * dt;
     //associated.box.y += speed.y * linearSpeed * dt;
 
+    if (isDashing) {
+    float t = std::min(dashTimer.Get() / dashDuration, 1.0f); // valor de 0.0 a 1.0
+
+    Vec2 newPos = dashStartPos * (1 - t) + dashTargetPos * t;
+    associated.box.SetPos(newPos);
+
+    if (t >= 1.0f) {
+        isDashing = false;
+    }
+}
+
+
     const float mapStartX = 160;
     const float mapStartY = 310;
     const float mapEndX = 800;
@@ -153,7 +174,7 @@ void Character::Update(float dt) {
     associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
 
     // Animação baseada no temporizador de caminhada
-    if (walkTimer.Get() < 0.2f) {
+    if (isDashing || walkTimer.Get() < 0.2f) {
         if (facingLeft)
             animator->SetAnimation("walking_left");
         else
