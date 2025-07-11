@@ -19,7 +19,7 @@ Character::Character(GameObject& associated, std::string sprite)
       deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav") {
 
     
-    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 4, 3);
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 12, 8);
     spriteRenderer->SetScale(2,2);
     associated.AddComponent(new Collider(associated));
     associated.AddComponent(spriteRenderer);
@@ -28,12 +28,25 @@ Character::Character(GameObject& associated, std::string sprite)
     associated.box.h = spriteRenderer->GetHeight();
 
     Animator* animator = new Animator(associated);
-    animator->AddAnimation("idle", Animation(0, 2, 9, SDL_FLIP_NONE));
-    animator->AddAnimation("idle_left", Animation(0, 2, 9, SDL_FLIP_HORIZONTAL));
-    animator->AddAnimation("walking", Animation(8, 11, 3, SDL_FLIP_NONE));
-    animator->AddAnimation("walking_left", Animation(8, 11, 3, SDL_FLIP_HORIZONTAL));
-    animator->AddAnimation("dead", Animation(10, 11, 12,SDL_FLIP_NONE));
-    animator->SetAnimation("idle");
+
+    //Idle
+
+    animator->AddAnimation("idle_front", Animation(0, 2, 9, SDL_FLIP_NONE));
+    animator->AddAnimation("idle_side_right", Animation(12, 14, 9, SDL_FLIP_NONE));
+    animator->AddAnimation("idle_side_left", Animation(12, 14, 9, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("idle_back", Animation(24, 26, 9, SDL_FLIP_NONE));
+
+
+    //Walking
+    animator->AddAnimation("walk_side_right",  Animation(36, 39, 4, SDL_FLIP_NONE)); // Linha 3
+    animator->AddAnimation("walk_side_left",  Animation(36, 39, 4, SDL_FLIP_HORIZONTAL)); // Linha 3
+    animator->AddAnimation("walk_back",  Animation(48, 51, 4, SDL_FLIP_NONE));// Linha 4
+    animator->AddAnimation("walk_front", Animation(60, 63, 4, SDL_FLIP_NONE));// Linha 5
+
+    //Death
+    animator->AddAnimation("dead", Animation(84, 96, 6,SDL_FLIP_NONE));
+
+    animator->SetAnimation("idle_front");
     associated.AddComponent(animator);
 
     if (player){
@@ -105,10 +118,12 @@ void Character::Update(float dt) {
         if (std::abs(direction.x) > std::abs(direction.y)) {
             // Movimento horizontal
             speed = Vec2((direction.x > 0) ? 1 : -1, 0);
+            currentDirection = (speed.x > 0) ? "right" : "left";
             facingLeft = speed.x <0;
         } else {
             // Movimento vertical
             speed = Vec2(0, (direction.y > 0) ? 1 : -1);
+            currentDirection = (speed.y > 0) ? "down" : "up";
         }
 
         // Move imediatamente 1 tile (modo tabuleiro)
@@ -121,17 +136,17 @@ void Character::Update(float dt) {
 
         isDashing = true;
         dashTimer.Restart();
-
         walkTimer.Restart();
-
-        // Atualiza o animator
-        Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
-        if (speed.x < 0)
-            animator->SetAnimation("walking_left");
-        else if (speed.x > 0)
-            animator->SetAnimation("walking");
+            // Set animação de caminhada
+        if (currentDirection == "up")
+            animator->SetAnimation("walk_back");
+        else if (currentDirection == "down")
+            animator->SetAnimation("walk_front");
+        else if (currentDirection == "left")
+            animator->SetAnimation("walk_side_left");
         else
-            animator->SetAnimation(facingLeft ? "walking_left" : "walking");
+            animator->SetAnimation("walk_side_right");
+
         } else if (cmd.type == Command::SHOOT) { //VERIFICAR
             auto gunPtr = gun.lock();
             if (!gunPtr) {
@@ -153,16 +168,27 @@ void Character::Update(float dt) {
     //associated.box.x += speed.x * linearSpeed * dt;
     //associated.box.y += speed.y * linearSpeed * dt;
 
+
+    // Dash em andamento
     if (isDashing) {
-    float t = std::min(dashTimer.Get() / dashDuration, 1.0f); // valor de 0.0 a 1.0
+        float t = std::min(dashTimer.Get() / dashDuration, 1.0f);
+        Vec2 newPos = dashStartPos * (1 - t) + dashTargetPos * t;
+        associated.box.SetPos(newPos);
 
-    Vec2 newPos = dashStartPos * (1 - t) + dashTargetPos * t;
-    associated.box.SetPos(newPos);
+        if (t >= 1.0f) {
+            isDashing = false;
 
-    if (t >= 1.0f) {
-        isDashing = false;
+            // ✅ Transição imediata para animação idle ao fim do dash
+            if (currentDirection == "up")
+                animator->SetAnimation("idle_back");
+            else if (currentDirection == "down")
+                animator->SetAnimation("idle_front");
+            else if (currentDirection == "left")
+                animator->SetAnimation("idle_side_left");
+            else
+                animator->SetAnimation("idle_side_right");
+        }
     }
-}
 
 
     const float mapStartX = 160;
@@ -173,21 +199,6 @@ void Character::Update(float dt) {
     associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
     associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
 
-    // Animação baseada no temporizador de caminhada
-    if (isDashing || walkTimer.Get() < 0.2f) {
-        if (facingLeft)
-            animator->SetAnimation("walking_left");
-        else
-            animator->SetAnimation("walking");
-    } else {
-        if (facingLeft)
-            animator->SetAnimation("idle_left");
-        else
-            animator->SetAnimation("idle");
-    }
-
-
-    
 
     // Reset velocidade
     linearSpeed = 0;
