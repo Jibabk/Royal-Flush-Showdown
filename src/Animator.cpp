@@ -17,8 +17,14 @@ void Animator::Update(float /*dt*/) {
             timeElapsed -= frameTime;
 
             if (currentFrame > frameEnd) {
-                currentFrame = frameStart;
+                if (loop) {
+                    currentFrame = frameStart;
+                } else {
+                    currentFrame = frameEnd;
+                    finished = true;
+                }
             }
+
 
             // Atualiza o frame no SpriteRenderer
             Component* cpt = associated.GetComponent("SpriteRenderer");
@@ -68,4 +74,13 @@ void Animator::AddAnimation(std::string name, Animation anim) {
     if (animations.find(name) == animations.end()) {
         animations[name] = anim;
     }
+}
+
+void Animator::SetLoop(bool l) {
+    loop = l;
+    finished = false;
+}
+
+bool Animator::IsFinished(std::string name) const {
+    return !loop && finished && current == name;
 }

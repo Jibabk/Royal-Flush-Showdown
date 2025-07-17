@@ -31,6 +31,7 @@ private:
     bool isDead;
     bool started;
     
+    
 };
 
 #endif

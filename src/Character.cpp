@@ -10,6 +10,16 @@
 #include <Collider.h>
 #include <Bullet.h>
 #include <Resources.h>
+#include "GameData.h"
+#include "DeathState.h"
+#include "EndState.h"
+
+
+
+Vec2 Lerp(const Vec2& start, const Vec2& end, float t) {
+    return start * (1.0f - t) + end * t;
+}
+
 
 Character* Character::player = nullptr;
 int Character::npcCount = 0;
@@ -45,6 +55,9 @@ Character::Character(GameObject& associated, std::string sprite)
 
     //Death
     animator->AddAnimation("dead", Animation(84, 96, 6,SDL_FLIP_NONE));
+
+    //Damage
+    animator->AddAnimation("hit",Animation(72,75,6,SDL_FLIP_NONE));
 
     animator->SetAnimation("idle_front");
     associated.AddComponent(animator);
@@ -85,22 +98,18 @@ void Character::Update(float dt) {
 
 
     damageCooldown.Update(dt);
-    if (hp <= 0) {
-        auto gunPtr = gun.lock();
-        if (gunPtr) {
-            gunPtr->RequestDelete();
-        }
+    if (hp <= 0 && !isDead) {
         isDead = true;
-        animator->SetAnimation("dead");
-    }
 
-    if (isDead) {
-        deathTimer.Update(dt);
-        if (deathTimer.Get() > 3.0f) {
-            associated.RequestDelete();
+        if (this == Character::player) {
+            Game::GetInstance().Push(new DeathState(associated.box.Center()));
         }
+
+        //associated.SetVisible(false);  // remove o personagem original
         return;
     }
+
+
 
     // Executar comandos pendentes
     while (!taskQueue.empty() && !isDead) {
@@ -190,6 +199,18 @@ void Character::Update(float dt) {
         }
     }
 
+    if (playingHitAnim) {
+    hitTimer.Update(dt);
+    if (hitTimer.Get() > 0.3f) { // tempo da animação de hit
+        playingHitAnim = false;
+        Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+        if (animator) {
+            animator->SetAnimation("idle_front");
+        }
+    }
+}
+
+
 
     const float mapStartX = 160;
     const float mapStartY = 310;
@@ -270,12 +291,20 @@ void Character::NotifyCollision(GameObject& other) {
 }
 
 void Character::TakeDamage(int damage) {
+    Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+
     if (hp <= 0 || isDead) {
         return; // Já está morto ou não pode receber dano
     }
+
+    animator->SetAnimation("hit");
+    animator->SetLoop(false);
+    playingHitAnim = true;
+    hitTimer.Restart();
+
     hp -= damage;
     hitSound.Play(1);
-    //std::cout << "[Character] Took damage. HP: " << hp << std::endl;
+
 
     if (hp <= 0) {
         deathSound.Play(1);

@@ -62,6 +62,8 @@ private:
     float dashDuration = 0.2f;  // em segundos
     Timer dashTimer;
     std::string currentDirection = "down"; // Pode ser "up", "down", "left", "right"
+    Timer hitTimer;
+    bool playingHitAnim = false;
 
     };
 
