@@ -57,7 +57,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()
     GameObject* playerGO = new GameObject();
     playerGO->box.x = 320;
     playerGO->box.y = 480;
-    playerGO->AddComponent(new Character(*playerGO, "Recursos/img/protag_spritesheet.png"));
+    playerGO->AddComponent(new Character(*playerGO, "Recursos/img/protag.spritesheet-v3.png"));
     playerGO->AddComponent(new PlayerController(*playerGO));
     AddObject(playerGO);
     //Camera::Follow(playerGO);

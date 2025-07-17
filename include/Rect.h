@@ -16,6 +16,24 @@ public:
     Vec2 Center() const {
         return Vec2(x + w / 2.0f, y + h / 2.0f);
     }
+
+    Vec2 Pos() const {
+    return Vec2(x, y);
+}
+
+    void SetPos(const Vec2& pos) {
+        x = pos.x;
+        y = pos.y;
+    }
+
+    void SetCenter(const Vec2& center) {
+        x = center.x - w / 2.0f;
+        y = center.y - h / 2.0f;
+}
+
+
 };
+
+
 
 #endif

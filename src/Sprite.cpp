@@ -44,14 +44,18 @@ void Sprite::SetFrame(int frame) {
         return;
     }
 
-    int frameW = width / frameCountW;
-    int frameH = height / frameCountH;
+    // ALTERADO O CALCUDO DE RECORTE DOS FRAMES
+    float frameW = static_cast<float>(width) / frameCountW;
+    float frameH = static_cast<float>(height) / frameCountH;
 
     int row = frame / frameCountW;
     int col = frame % frameCountW;
 
-    int x = col * frameW;
-    int y = row * frameH;
+    int x = static_cast<int>(col * frameW + 0.5f);
+    int y = static_cast<int>(row * frameH + 0.5f);
+    int w = static_cast<int>(frameW + 0.5f);
+    int h = static_cast<int>(frameH + 0.5f);
+
 
     SetClip(x, y, frameW, frameH);
 }

@@ -17,6 +17,11 @@ public:
 
     void SetAnimation(std::string name);
     void AddAnimation(std::string name, Animation anim);
+    void SetLoop(bool loop);
+    bool IsFinished(std::string animationName) const;
+
+
+
 
 private:
     std::unordered_map<std::string, Animation> animations;
@@ -25,6 +30,8 @@ private:
     float frameTime;
     int currentFrame;
     float timeElapsed;
+    bool loop = true;
+    bool finished = false;
 
     std::string current;
 };

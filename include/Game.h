@@ -42,7 +42,7 @@ private:
 
     int frameStart;
     float dt;
-
+    
     int width;
     int height;
 };

@@ -7,6 +7,7 @@
 ## 🎮 Sobre o Jogo
 
 
+
 <br>
 
 ## 🛠️ Tecnologias Utilizadas
@@ -29,7 +30,7 @@ Antes de começar, certifique-se de que você tem o `make` e um compilador C++ (
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/SEU-USUARIO/Royal-Flush-Showdown.git](https://github.com/SEU-USUARIO/Royal-Flush-Showdown.git)
+    git clone https://github.com/Jibabk/Royal-Flush-Showdown.git
     ```
 
 2.  **Acesse a pasta do projeto:**
@@ -65,12 +66,14 @@ Este projeto foi concebido e desenvolvido por uma equipe talentosa e dedicada.
 
 ### 💻 Programação
 * [Daniel Monteiro]
-* [Jean]
+* [Jean Karia]
 * [Gabriel Kenji]
 
 ### 🎨 Design Gráfico
 * [João Mateus]
-* [Lucas Lisboa]
 * [Maria Fernanda]
+
 ### 🎵 Composição Musical
-* [Alvesquecanta]
+* [João Alves]
+* [Lucas Lisboa]
+
