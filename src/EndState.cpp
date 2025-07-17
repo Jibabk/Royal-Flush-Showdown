@@ -16,19 +16,19 @@ EndState::EndState(){
         bg->AddComponent(sr);
     } else {
         backgroundMusic.Open("Recursos/audio/endStateLose.ogg");
-        SpriteRenderer* sr = new SpriteRenderer(*bg, "Recursos/img/Lose.png");
-        sr->SetCameraFollower(true);
-        bg->AddComponent(sr);
+
     }
 
     AddObject(bg);
 
     GameObject* textGO = new GameObject();
-    textGO->box.x = 200;
-    textGO->box.y = 450;
+    textGO->box.x = Game::GetInstance().GetWidth()/2 - 150;
+    textGO->box.y = Game::GetInstance().GetHeight()/2 - 100;
 
-    textGO->AddComponent(new Text(*textGO, "Recursos/font/neodgm.ttf", 40, Text::SOLID, 
-                                  "Press SPACE to play again or ESC to exit", {255, 255, 255, 255}));
+    textGO->AddComponent(new Text(*textGO, "Recursos/font/neodgm.ttf", 80, Text::SOLID, 
+                              "", {255, 255, 255, 255}));
+
+
 
     AddObject(textGO);
 }

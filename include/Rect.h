@@ -26,6 +26,14 @@ public:
         y = pos.y;
     }
 
+    void SetCenter(const Vec2& center) {
+        x = center.x - w / 2.0f;
+        y = center.y - h / 2.0f;
+}
+
+
 };
+
+
 
 #endif
