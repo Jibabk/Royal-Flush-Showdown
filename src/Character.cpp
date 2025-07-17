@@ -16,10 +16,6 @@
 
 
 
-Vec2 Lerp(const Vec2& start, const Vec2& end, float t) {
-    return start * (1.0f - t) + end * t;
-}
-
 
 Character* Character::player = nullptr;
 int Character::npcCount = 0;
