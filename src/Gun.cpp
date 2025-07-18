@@ -18,8 +18,7 @@ Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relat
       character(character),
       angle(0),
       relativeOffset(relativeOffset) {
-
-
+        
     associated.AddComponent(new SpriteRenderer(associated, "Recursos/img/Gun.png", 3, 2));
 
     Animator* animator = new Animator(associated);
@@ -30,6 +29,9 @@ Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relat
 
     animator->SetAnimation("idle");
     associated.AddComponent(animator);
+
+    shotSound.SetVolume(32);   // 25% do volume máximo
+    reloadSound.SetVolume(32); // 25% do volume máximo
 }
 
 void Gun::Update(float dt) {

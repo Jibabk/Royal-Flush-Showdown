@@ -1,5 +1,6 @@
 #include "Music.h"
 #include <iostream>
+#define INCLUDE_SDL_MIXER
 
 Music::Music() : music(nullptr) {}
 
@@ -23,6 +24,19 @@ void Music::Open(const std::string file) {
     if (!music) {
         std::cerr << "Erro ao carregar música: " << Mix_GetError() << std::endl;
     }
+}
+
+void Music::SetVolume(int volume) {
+    // Garante que o volume está no intervalo permitido
+    if (volume < 0) volume = 0;
+    if (volume > MIX_MAX_VOLUME) volume = MIX_MAX_VOLUME;
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
+        std::cerr << "Erro ao inicializar SDL_mixer: " << Mix_GetError() << std::endl;
+    }
+
+    Mix_VolumeMusic(volume);
+
+    
 }
 
 void Music::Play(int times) {

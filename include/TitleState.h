@@ -19,8 +19,12 @@ public:
     void Render() override;
 
 private:
+    bool showText = true;
     Rect jogarArea;
+    Music backgroundMusic;
     Rect sairArea;
+    Timer textTimer;
+
 };
 
-#endif
+#endif // TITLE_STATE_H
