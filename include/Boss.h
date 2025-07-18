@@ -63,6 +63,9 @@ private:
     bool waitingToReturnHands = false;
     bool preparingCardSpring = false;
     bool waitingHandsReturn = false;
+    bool crazyMode = false;
+    bool transitionEnded = true;
+    Timer animationTimer;
 
 
 };

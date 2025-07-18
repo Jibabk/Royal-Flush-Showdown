@@ -66,7 +66,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"),deck(D
     GameObject* BossGO = new GameObject();
     BossGO->box.x = 360;
     BossGO->box.y = 50;
-    BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/boss_v2.png"));
+    BossGO->AddComponent(new Boss(*BossGO, "Recursos/img/Rei.png"));
     BossGO->AddComponent(new BossAiController(*BossGO));
     AddObject(BossGO);
     //Camera::Follow(BossGO);
