@@ -21,10 +21,10 @@ Vec2 inicialHandPos = Vec2(160, 40);
 
 Boss::Boss(GameObject& associated, std::string sprite)
     : Component(associated), speed(0, 0), linearSpeed(0), hp(100), maxHp(100), currentHp(100),
-      deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/efeitos/rei_hit.wav") {
+      deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/efeitos/rei_hit.wav"),animationTimer() {
 
     
-    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 2, 1);
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 10, 5);
     associated.AddComponent(new Collider(associated));
     spriteRenderer->SetScale(2,2); // Ajusta o tamanho do sprite
     associated.AddComponent(spriteRenderer);
@@ -33,9 +33,14 @@ Boss::Boss(GameObject& associated, std::string sprite)
     associated.box.h = spriteRenderer->GetHeight();
 
     Animator* animator = new Animator(associated);
-    animator->AddAnimation("actionIdle", Animation(0, 0, 9, SDL_FLIP_NONE));
-    animator->AddAnimation("cardIdle", Animation(1, 1, 9, SDL_FLIP_NONE));
-    animator->SetAnimation("cardIdle");
+
+    animator->AddAnimation("IdleNormal", Animation(0,0,9));
+    animator->AddAnimation("damageNormal", Animation(10, 15,9));
+    animator->AddAnimation("transitionCrazy", Animation(20, 29, 9));
+    animator->AddAnimation("IdleCrazy", Animation(30,30,9));
+    animator->AddAnimation("transitionNormal", Animation(40, 49, 9));
+
+    animator->SetAnimation("IdleNormal");
     associated.AddComponent(animator);
 
     if (!chefe)
@@ -120,7 +125,7 @@ void Boss::Update(float dt) {
         }
 
         isDead = true;
-        //animator->SetAnimation("dead");
+       
     }
 
     if (isDead) {
@@ -132,26 +137,55 @@ void Boss::Update(float dt) {
     }
 
     // Executar comandos pendentes
-    if(stage->GetCurrentMode() == StageState::CARD_MODE) {
-        auto gunA = gunLeft.lock();
-        auto gunB = gunRight.lock();
-        if (gunA && gunB) {
-            Gun* gunCompA = (Gun*)gunA->GetComponent("Gun");
-            Gun* gunCompB = (Gun*)gunB->GetComponent("Gun");
-            if (gunCompA) gunCompA->ResetOffset();
-            if (gunCompB) gunCompB->ResetOffset();
+    if (stage->GetCurrentMode() == StageState::CARD_MODE) {
+    if (crazyMode) {
+        if (animator->GetAnimationName() != "transitionNormal") {
+            animator->SetAnimation("transitionNormal");
+            animator->SetLoop(false);
         }
-        // Se estiver no modo de cartas, não atualiza o Boss
-        waitingHandsReturn = false;
-        preparingCardSpring = false;
-        if (animator) {
-            animator->SetAnimation("cardIdle");
+
+        if (animator->IsFinished("transitionNormal")) {
+            animator->SetAnimation("IdleNormal");
+            animator->SetLoop(true);
+            crazyMode = false; // Voltou ao normal
         }
-        speed = Vec2(0, 0);
-        linearSpeed = 0;
-        
-        return;
-    }else{
+    }
+
+    // Reset das mãos
+    auto gunA = gunLeft.lock();
+    auto gunB = gunRight.lock();
+    if (gunA && gunB) {
+        Gun* gunCompA = (Gun*)gunA->GetComponent("Gun");
+        Gun* gunCompB = (Gun*)gunB->GetComponent("Gun");
+        if (gunCompA) gunCompA->ResetOffset();
+        if (gunCompB) gunCompB->ResetOffset();
+    }
+
+    waitingHandsReturn = false;
+    preparingCardSpring = false;
+    speed = Vec2(0, 0);
+    linearSpeed = 0;
+
+    return;
+}else{
+        Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+        std::cout << crazyMode << std::endl;
+
+        // Modo "normal" → precisa mudar para "louco"
+        if (!crazyMode) {
+            if (animator->GetAnimationName() != "transitionCrazy") {
+                animator->SetAnimation("transitionCrazy");
+                animator->SetLoop(false);
+            }
+
+            if (animator->IsFinished("transitionCrazy")) {
+                animator->SetAnimation("IdleCrazy");
+                animator->SetLoop(true);
+                crazyMode = true; // Agora sim estamos no modo louco
+            }
+        }
+
+
 
     if (waitingToReturnHands) {
         auto gunA = gunLeft.lock();
@@ -285,30 +319,6 @@ void Boss::Update(float dt) {
 
     //associated.box.x = std::max(mapStartX, std::min(associated.box.x, mapEndX - associated.box.w));
     //associated.box.y = std::max(mapStartY, std::min(associated.box.y, mapEndY - associated.box.h));
-
-
-    // Atualizar animação
-    if (speed.Magnitude() > 0.1f) {
-        if (speed.x < -0.1f) {
-            //animator->SetAnimation("walking_left");
-            this->facingLeft = true;
-        } else if (speed.x > 0.1f) {
-            //animator->SetAnimation("walking");
-            this->facingLeft = false;
-        } else {
-            if (this->facingLeft) {
-                //animator->SetAnimation("walking_left");
-            } else {
-                //animator->SetAnimation("walking");
-            }
-        }
-    } else {
-        if (this->facingLeft) {
-            //animator->SetAnimation("idle_left");
-        } else
-        animator->SetAnimation("actionIdle");
-        
-    }
 
     
 

@@ -19,6 +19,9 @@ public:
     void AddAnimation(std::string name, Animation anim);
     void SetLoop(bool loop);
     bool IsFinished(std::string animationName) const;
+    std::string GetAnimationName(){
+        return current;
+    }
 
 
 
