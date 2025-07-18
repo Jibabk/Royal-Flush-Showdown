@@ -86,11 +86,13 @@ StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"),bossMu
     bossMusic.SetVolume(64);
 }
 
+
 StageState::~StageState() {
     backgroundMusic.Stop();
-    bossMusic.Stop();           // Para a música do Boss também
+    bossMusic.Stop(); // Para a música do Boss também
     objectArray.clear();
 }
+
 
 void StageState::LoadAssets() {
     // Se precisar carregar assets externos além dos que estão no construtor
@@ -181,23 +183,6 @@ void StageState::Update(float dt) {
     std::cout << "Volume atual: " << Mix_VolumeMusic(-1) << std::endl;
     }
 
-    // Verifica se o Boss está com metade da vida
-    if (Boss::chefe && !bossMusicTriggered) {
-        if (Boss::chefe->GetHP() <= Boss::chefe->GetMaxHP() / 2) {
-            // Para a música de fundo atual
-            backgroundMusic.Stop();
-            
-            // Inicia a música do Boss
-            bossMusic.Play();
-            
-            bossMusicTriggered = true;
-            std::cout << "[MÚSICA] Boss Music iniciada - Boss com metade da vida!" << std::endl;
-        }
-    }
-
-
-
-
     //if (input.KeyPress(SDLK_SPACE)) {
     //    GameObject* zombie = new GameObject();
     //    zombie->box.x = input.GetMouseX() + Camera::pos.x;
@@ -232,7 +217,8 @@ void StageState::Update(float dt) {
         currentMode = ACTION_MODE;
         modeTimer.Restart();
         //std::cout << "[MODO] Ação iniciada!" << std::endl;
-    }
+    
+}
 
     // X -> descartar a carta selecionada e comprar nova
     if (input.KeyPress(SDLK_x)) {
@@ -255,7 +241,6 @@ void StageState::Update(float dt) {
                 if (auto shared = weak.lock()) {
                     cards[i]->RequestDelete();  // descarta a anterior
                     cards[i] = shared;          // substitui pela nova
-                }
 
                 break;  // só troca uma carta
             }
@@ -265,6 +250,7 @@ void StageState::Update(float dt) {
 
 
     UpdateArray(dt);
+    
 
     // Checar colisões
     for (size_t i = 0; i < objectArray.size(); ++i) {
@@ -302,6 +288,9 @@ void StageState::Update(float dt) {
         GameData::playerVictory = true;
         popRequested = true;
         Game::GetInstance().Push(new EndState());
+
+    
+
 }
 
 }

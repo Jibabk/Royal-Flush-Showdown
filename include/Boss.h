@@ -31,8 +31,7 @@ public:
     static Boss* chefe;
     void Issue(Command task);
 
-    int GetHP() const { return hp; }
-    int GetMaxHP() const { return maxHp; }
+    
 
     void TakeDamage(int damage);
     bool IsDead() const { return isDead; }
@@ -41,6 +40,9 @@ public:
         speed = newSpeed;
         linearSpeed = speed.Magnitude();
     }
+    int GetHP() const { return hp; }
+    int GetMaxHP() const { return maxHp; }
+
     float GetHpPercent() const {
     return currentHp / (float)maxHp;
 }
