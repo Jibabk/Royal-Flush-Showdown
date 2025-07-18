@@ -22,22 +22,6 @@ private:
     Music backgroundMusic;
     Timer textTimer;
 
-    GameObject* efeitoBG = nullptr;
-    GameObject* player = nullptr;
-    GameObject* rei = nullptr;
-    GameObject* cartas = nullptr;
-
-    float playerYInicial, playerYFinal;
-    float reiYInicial, reiYFinal;
-    // Temporizadores
-    Timer playerTimer, reiTimer, cartasTimer;
-
-    // Flags de controle de animação
-    bool playerAnimDone;
-    bool reiAnimDone;
-    bool cartasAnimDone;
-    bool cartasVisiveis;
-
 };
 
 #endif // TITLE_STATE_H
