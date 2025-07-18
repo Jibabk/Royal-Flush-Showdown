@@ -22,7 +22,7 @@ private:
     Vec2 destination;
 
     static constexpr float moveSpeed = 150.0f;
-    static constexpr float restCooldown = 1.5f;
+    static constexpr float restCooldown = 2.5f;
     static constexpr float proximityThreshold = 30.0f;
 };
 
