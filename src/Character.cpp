@@ -105,7 +105,7 @@ void Character::Update(float dt) {
         return;
     }
 
-
+    
 
     // Executar comandos pendentes
     while (!taskQueue.empty() && !isDead) {
@@ -249,6 +249,9 @@ bool Character::Is(std::string type) const {
 }
 
 void Character::Issue(Command task) {
+        // Descarta comandos de movimento se estiver dashing
+    if (task.type == Command::MOVE && isDashing)
+        return;
     taskQueue.push(task);
 }
 

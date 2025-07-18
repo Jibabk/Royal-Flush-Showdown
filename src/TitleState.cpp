@@ -5,34 +5,31 @@
 #include "SpriteRenderer.h"
 #include "Camera.h"
 
-#include <SDL_include.h>
-#include <Text.h>
-#include <Timer.h>
-#include <iostream>
-
-
-
 TitleState::TitleState() : backgroundMusic("Recursos/audio/menu.wav"){
+    Camera::pos = {0, 0};
+    Camera::speed = {0, 0};
 
-    GameObject* titleGO = new GameObject();
+    // Fundo com imagem completa do menu
+    GameObject* bg = new GameObject();
+    SpriteRenderer* bgSprite = new SpriteRenderer(*bg, "Recursos/img/menu/Capa_2_c_borda.png");
+    bgSprite->SetCameraFollower(true);
 
-    SpriteRenderer* sprite = new SpriteRenderer(*titleGO, "Recursos/img/Title.png");
-    sprite->SetCameraFollower(true);
+    // Ajusta escala da imagem para o tamanho da tela
+    float screenW = Game::GetInstance().GetWidth();
+    float screenH = Game::GetInstance().GetHeight();
+    float imageW = bgSprite->GetWidth();
+    float imageH = bgSprite->GetHeight();
 
-    titleGO->AddComponent(sprite);
-    AddObject(titleGO);
+    float scaleX = screenW / imageW;
+    float scaleY = screenH / imageH;
 
-    GameObject* textGO = new GameObject();
+    bgSprite->SetScale(scaleX, scaleY);
+    bg->AddComponent(bgSprite);
+    AddObject(bg);
 
-    SDL_Color white = {255, 255, 255, 255};
-
-    textGO->box.x = 400;
-    textGO->box.y = 450;
-
-    textGO->AddComponent(new Text(*textGO, "Recursos/font/neodgm.ttf",40,Text::SOLID,"Press SPACE to Start",white));
-
-    AddObject(textGO);
-
+    // Define áreas clicáveis com base na imagem:
+    jogarArea = Rect(150, 360, 200, 75); // ajuste fino conforme a imagem
+    sairArea = Rect(150, 465, 200, 75);  // ajuste fino conforme a imagem    
     backgroundMusic.SetVolume(64); // Define o volume da música para 100%, volume de 0 a 128
     backgroundMusic.Play(); // Toca a música em loop
 
@@ -42,57 +39,40 @@ TitleState::~TitleState() {
     objectArray.clear();
 }
 
-void TitleState::LoadAssets() {
-    // Nenhum asset extra além do background
-}
-
 void TitleState::Start() {
-    Camera::pos = {0, 0};
-    Camera::speed = {0, 0};
     LoadAssets();
     StartArray();
     started = true;
 }
 
-void TitleState::Pause() {
-}
+void TitleState::Pause() {}
+void TitleState::Resume() {}
 
-void TitleState::Resume() {
-    for (auto& obj : objectArray) {
-        Text* text = (Text*) obj->GetComponent("Text");
-        if (text) {
-            text->Refresh();
-        }
-    }
+void TitleState::LoadAssets() {
+    // Ex: backgroundMusic.Open("Recursos/audio/menuMusic.ogg");
+    // backgroundMusic.Play();
 }
-
 
 void TitleState::Update(float dt) {
-    // Dentro de Update:
-    textTimer.Update(dt);
-    if (textTimer.Get() > 0.5f) {
-        showText = !showText;
-        textTimer.Restart();
-    }
     InputManager& input = InputManager::GetInstance();
+    Vec2 mouse(input.GetMouseX(), input.GetMouseY());
+
+    if (input.MousePress(LEFT_MOUSE_BUTTON)) {
+        if (jogarArea.Contains(mouse)) {
+            Game::GetInstance().Push(new StageState());
+        } else if (sairArea.Contains(mouse)) {
+            quitRequested = true;
+        }
+    }
+
     if (input.QuitRequested() || input.KeyPress(ESCAPE_KEY)) {
         quitRequested = true;
     }
-    if (input.KeyPress(SDLK_SPACE)) {
-        Game::GetInstance().Push(new StageState());
-    }
-    
+
     UpdateArray(dt);
 }
 
 void TitleState::Render() {
-    for (int i = 0; i < objectArray.size(); ++i) {
-        if (objectArray[i]->GetComponent("Text") != nullptr) {
-            if (showText) {
-                objectArray[i]->Render();
-            }
-        } else {
-            objectArray[i]->Render();
-        }
-    }
+    RenderArray();
+
 }
