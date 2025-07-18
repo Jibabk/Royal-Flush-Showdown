@@ -10,18 +10,27 @@
 #include <iostream>
 #include <Character.h>
 
-Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relativeOffset)
+Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relativeOffset, bool rightHand)
     : Component(associated),
       shotSound("Recursos/audio/Range.wav"),
       reloadSound("Recursos/audio/PumpAction.mp3"),
       cooldown(800),  // milissegundos
       character(character),
       angle(0),
-      relativeOffset(relativeOffset) {
+      relativeOffset(relativeOffset), 
+      defaultOffset(relativeOffset), 
+      targetOffset(relativeOffset),
+      rightHand(rightHand)
+ {
 
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/Maos_Spritesheet_beta.png", 13, 5);
+    spriteRenderer->SetScale(2, 2); // Ajusta o tamanho do sprite
+    associated.AddComponent(spriteRenderer);
 
-    associated.AddComponent(new SpriteRenderer(associated, "Recursos/img/Gun.png", 3, 2));
-
+    associated.box.w = spriteRenderer->GetWidth();
+    if (rightHand) {
+        associated.box.x += associated.box.w; // Ajusta a posição para a mão direita
+    }
     Animator* animator = new Animator(associated);
     animator->AddAnimation("idle", Animation(0, 0, 0));
     animator->AddAnimation("idle_flip", Animation(0, 0, 0, SDL_FLIP_VERTICAL));
@@ -44,6 +53,20 @@ void Gun::Update(float dt) {
     Vec2 ownerCenter = Vec2(owner->box.x + owner->box.w / 2, owner->box.y + owner->box.h / 2);
     associated.box.x = owner->box.Center().x + relativeOffset.x - associated.box.w / 2;
     associated.box.y = owner->box.Center().y + relativeOffset.y - associated.box.h / 2;
+
+    // Interpolação suave de offset
+    Vec2 delta = targetOffset - relativeOffset;
+    float distance = delta.Magnitude();
+
+    if (distance > 1.0f) {  // só move se estiver longe o bastante
+        Vec2 step = delta.Normalized() * offsetLerpSpeed * dt;
+        if (step.Magnitude() > distance)
+            relativeOffset = targetOffset;
+        else
+            relativeOffset += step;
+    } else {
+        relativeOffset = targetOffset;
+    }
 
 
     // deslocar levemente na direção do ângulo
@@ -99,3 +122,40 @@ void Gun::Shoot(Vec2 target) {
     state.AddObject(bulletGO);  // adiciona a bala ao estado
     reloadSound.Play(1);  // toca som de recarga
 }
+
+void Gun::SetOffset(Vec2 offset) {
+    targetOffset = offset;
+}
+
+void Gun::ResetOffset() {
+    targetOffset = defaultOffset;
+}
+
+bool Gun::HasReachedTarget() const {
+    return (relativeOffset - targetOffset).Magnitude() < 1.0f;
+}
+
+bool Gun::HasReachedDefaultOffset() const {
+    return relativeOffset.x == defaultOffset.x && relativeOffset.y == defaultOffset.y;
+}
+
+void Gun::SetOffsetPath(const std::vector<Vec2>& path) {
+    offsetPath = path;
+    currentOffsetIndex = 0;
+}
+
+bool Gun::UpdateOffsetPath(float dt) {
+    if (currentOffsetIndex >= offsetPath.size()) return true;
+
+    this->SetOffset(offsetPath[currentOffsetIndex]);
+    return this->HasReachedTarget();
+}
+
+bool Gun::AdvanceOffsetStep() {
+    if (currentOffsetIndex < offsetPath.size() - 1) {
+        currentOffsetIndex++;
+        return true;
+    }
+    return false;
+}
+

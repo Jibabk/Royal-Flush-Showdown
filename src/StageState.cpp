@@ -21,7 +21,7 @@
 #include <Card.h>
 #include <PokerHand.h>
 
-StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()),cards() {
+StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wa"),deck(Deck()),cards() {
     // Background
     GameObject* bg = new GameObject();
     SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/background1.png");
@@ -107,7 +107,7 @@ void StageState::Update(float dt) {
     if (modeTimer.Get() > modeDuration) {
         if (currentMode == CARD_MODE) {
             currentMode = ACTION_MODE;
-            std::cout << "[MODO] Ação iniciada!" << std::endl;
+            //std::cout << "[MODO] Ação iniciada!" << std::endl;
         } else {
             currentMode = CARD_MODE;
             std::cout << "[MODO] Cartas iniciada!" << std::endl;
@@ -144,7 +144,7 @@ void StageState::Update(float dt) {
     }
 
     if (currentMode == ACTION_MODE) {
-        std::cout << "[MODO] Ação iniciada!" << std::endl;
+        //std::cout << "[MODO] Ação iniciada!" << std::endl;
 
         // Remove cartas
         for (auto& card : cards) {
@@ -196,7 +196,7 @@ void StageState::Update(float dt) {
 
         currentMode = ACTION_MODE;
         modeTimer.Restart();
-        std::cout << "[MODO] Ação iniciada!" << std::endl;
+        //std::cout << "[MODO] Ação iniciada!" << std::endl;
     }
 
     // X -> descartar a carta selecionada e comprar nova

@@ -11,8 +11,11 @@
 #include <Bullet.h>
 #include <Character.h>
 #include <StageState.h>
+#include <CardSpringAttack.h>
+#include <iostream>
 
 Boss* Boss::chefe = nullptr;
+Vec2 inicialHandPos = Vec2(160, 40);
 
 Boss::Boss(GameObject& associated, std::string sprite)
     : Component(associated), speed(0, 0), linearSpeed(0), hp(100), maxHp(100), currentHp(100),
@@ -21,7 +24,7 @@ Boss::Boss(GameObject& associated, std::string sprite)
     
     SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 2, 1);
     associated.AddComponent(new Collider(associated));
-    spriteRenderer->SetScale(1,1); // Ajusta o tamanho do sprite
+    spriteRenderer->SetScale(2,2); // Ajusta o tamanho do sprite
     associated.AddComponent(spriteRenderer);
 
     associated.box.w = spriteRenderer->GetWidth();
@@ -52,12 +55,12 @@ void Boss::Start() {
 
     GameObject* gunGO1 = new GameObject();
     gunGO1->box = associated.box;
-    gunGO1->AddComponent(new Gun(*gunGO1, state.GetObjectPtr(&associated),Vec2(-80, 20)));
+    gunGO1->AddComponent(new Gun(*gunGO1, state.GetObjectPtr(&associated),Vec2(-inicialHandPos.x, inicialHandPos.y), false));
     gunLeft = state.AddObject(gunGO1);
 
     GameObject* gunGO2 = new GameObject();
     gunGO2->box = associated.box;
-    gunGO2->AddComponent(new Gun(*gunGO2, state.GetObjectPtr(&associated),Vec2(80, 20)));
+    gunGO2->AddComponent(new Gun(*gunGO2, state.GetObjectPtr(&associated),Vec2(inicialHandPos.x, inicialHandPos.y), true));
     gunRight = state.AddObject(gunGO2);
 
     
@@ -95,16 +98,44 @@ void Boss::Update(float dt) {
 
     // Executar comandos pendentes
     if(stage->GetCurrentMode() == StageState::CARD_MODE) {
+        auto gunA = gunLeft.lock();
+        auto gunB = gunRight.lock();
+        if (gunA && gunB) {
+            Gun* gunCompA = (Gun*)gunA->GetComponent("Gun");
+            Gun* gunCompB = (Gun*)gunB->GetComponent("Gun");
+            if (gunCompA) gunCompA->ResetOffset();
+            if (gunCompB) gunCompB->ResetOffset();
+        }
         // Se estiver no modo de cartas, não atualiza o Boss
+        waitingHandsReturn = false;
+        preparingCardSpring = false;
         if (animator) {
             animator->SetAnimation("cardIdle");
         }
         speed = Vec2(0, 0);
         linearSpeed = 0;
+        
         return;
     }else{
 
-    while (!taskQueue.empty() && !isDead) {
+    if (waitingToReturnHands) {
+        auto gunA = gunLeft.lock();
+        auto gunB = gunRight.lock();
+
+        if (gunA && gunB) {
+            Gun* gunCompA = (Gun*)gunA->GetComponent("Gun");
+            Gun* gunCompB = (Gun*)gunB->GetComponent("Gun");
+
+
+            if (gunCompA && gunCompB &&
+                gunCompA->HasReachedDefaultOffset() && gunCompB->HasReachedDefaultOffset()) {
+                waitingToReturnHands = false;
+            }
+        }
+    }
+
+
+    while (!taskQueue.empty() && !isDead && !waitingToReturnHands && !preparingCardSpring) {
         Command cmd = taskQueue.front();
         taskQueue.pop();
 
@@ -121,7 +152,63 @@ void Boss::Update(float dt) {
                 auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
                 if (gunComp) gunComp->Shoot(cmd.pos);
             }
+        } else if (cmd.type == Command::SHOOT_BOTH) {
+            if (auto gunA = gunLeft.lock()) {
+                auto* gunCompA = (Gun*)gunA->GetComponent("Gun");
+                if (gunCompA) gunCompA->Shoot(cmd.pos);
+            }
+            if (auto gunB = gunRight.lock()) {
+                auto* gunCompB = (Gun*)gunB->GetComponent("Gun");
+                if (gunCompB) gunCompB->Shoot(cmd.pos);
+            } 
+        } else if (cmd.type == Command::POSITION_HANDS_FOR_LASER) {
+            auto gunA = gunLeft.lock();
+            auto gunB = gunRight.lock();
+            const float tileStartY = 512;
+            const float tileHeight = 65.0f;
+            int laserRow = 3;
+            float laserY = tileStartY + laserRow * tileHeight + tileHeight / 2;
+
+            float laserStartX = 160;
+            float laserEndX = 800;
+            Vec2 center = associated.box.Center();
+            Vec2 playerPos = Character::player->GetAssociated().box.Center();
+
+            if (gunA && gunB) {
+                Gun* gunCompA = static_cast<Gun*>(gunA->GetComponent("Gun"));
+                Gun* gunCompB = static_cast<Gun*>(gunB->GetComponent("Gun"));
+                if (gunCompA && gunCompB) {
+                    Vec2 center = associated.box.Center();
+                    Vec2 playerPos = Character::player->GetAssociated().box.Center();
+
+                    Vec2 finalOffsetA(160 - 60 - associated.box.Center().x, playerPos.y - associated.box.Center().y);
+                    Vec2 finalOffsetB(800 + 100 - associated.box.Center().x, playerPos.y - associated.box.Center().y);
+
+                    Vec2 midOffsetA = Vec2((finalOffsetA.x + 0) / 1.2, inicialHandPos.y - 10); // primeiro ponto: abaixo
+                    Vec2 preFinalA  = Vec2(finalOffsetA.x, midOffsetA.y - 15);           // segundo ponto: acima do final
+
+                    Vec2 midOffsetB = Vec2((finalOffsetB.x + 0) / 1.2, inicialHandPos.y - 10);
+                    Vec2 preFinalB  = Vec2(finalOffsetB.x, midOffsetB.y - 15);
+
+                    gunCompA->SetOffsetPath({midOffsetA, preFinalA, finalOffsetA});
+                    gunCompB->SetOffsetPath({midOffsetB, preFinalB, finalOffsetB});
+                    //gunCompA->SetOffset(finalOffsetA); // esquerda
+                    //gunCompB->SetOffset(finalOffsetB); // direita
+
+                    preparingCardSpring = true;
+                }
+                //if (gunCompA && gunCompB) {
+                //    gunCompA->SetOffset(Vec2(160 - associated.box.Center().x, playerPos.y - associated.box.Center().y)); // esquerda
+                //    gunCompB->SetOffset(Vec2(800 - associated.box.Center().x, playerPos.y - associated.box.Center().y)); // direita
+                //    preparingCardSpring = true;
+                //}
+
+            }
         }
+
+
+
+
     }
     }
 
@@ -167,6 +254,61 @@ void Boss::Update(float dt) {
     // Reset velocidade
     linearSpeed = 0;
     speed = Vec2(0, 0);
+
+
+if (preparingCardSpring) {
+    auto gunA = gunLeft.lock();
+    auto gunB = gunRight.lock();
+
+    if (gunA && gunB) {
+        Gun* gunCompA = static_cast<Gun*>(gunA->GetComponent("Gun"));
+        Gun* gunCompB = static_cast<Gun*>(gunB->GetComponent("Gun"));
+
+        if (gunCompA && gunCompB) {
+            bool reachedA = gunCompA->UpdateOffsetPath(dt);
+            bool reachedB = gunCompB->UpdateOffsetPath(dt);
+
+            if (reachedA && reachedB) {
+                // Avança para o próximo passo do caminho
+                bool nextA = gunCompA->AdvanceOffsetStep();
+                bool nextB = gunCompB->AdvanceOffsetStep();
+
+                if (!nextA && !nextB) {
+                    // Ambas chegaram no final do caminho
+                    Vec2 start = gunA->box.Center();
+                    Vec2 end = gunB->box.Center();
+
+                    GameObject* laserGO = new GameObject();
+                    laserGO->AddComponent(new CardSpringAttack(*laserGO, start, end));
+                    state.AddObject(laserGO);
+
+                    preparingCardSpring = false;
+                    waitingToReturnHands = true;
+                    handReturnTimer.Restart();
+                }
+            }
+        }
+
+    }
+}
+
+
+
+if (waitingToReturnHands && !preparingCardSpring) {
+    handReturnTimer.Update(dt);
+    if (handReturnTimer.Get() > 1.2f) {
+        auto gunA = gunLeft.lock();
+        auto gunB = gunRight.lock();
+        if (gunA && gunB) {
+            Gun* gunCompA = (Gun*)gunA->GetComponent("Gun");
+            Gun* gunCompB = (Gun*)gunB->GetComponent("Gun");
+            if (gunCompA) gunCompA->ResetOffset();
+            if (gunCompB) gunCompB->ResetOffset();
+        }
+    }
+}
+
+
 
     
 }
