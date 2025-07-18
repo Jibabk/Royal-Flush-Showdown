@@ -1,12 +1,12 @@
 # Royal Flush Showdown
 
-> Jogo de plataforma com elementos de poker desenvolvido para a disciplina de Introdução ao Desenvolvimento de Jogos (IDJ) do semestre 2025/1.
+> Jogo de plataforma com elementos de carteado(poker) desenvolvido para a disciplina de Introdução ao Desenvolvimento de Jogos (IDJ) do semestre 2025/1.
 
 <br>
 
 ## 🎮 Sobre o Jogo
 
-
+Um aldeão audacioso desafia o reinado de um rei arrogante em um confronto ancestral, onde regras milenares ditam um duelo peculiar que combina estratégia e reflexos. Neste enfrentamento, o jogador deve utilizar sua habilidade com mãos de poker para atacar a barra de vida do monarca durante sua vez, formando as melhores combinações possíveis dentro de um limite de tempo, enquanto nas rodadas do rei deve sobreviver a ondas de projéteis desviando com agilidade de seus ataques transformados. O soberano, inicialmente condescendente e formal, revela sua natureza competitiva e agressiva durante o combate, criando uma atmosfera tensa pontuada por momentos de humor inesperado, onde a burocracia real se mistura com a brutalidade de um duelo pela coroa.
 
 <br>
 
@@ -54,9 +54,11 @@ Antes de começar, certifique-se de que você tem o `make` e um compilador C++ (
 
 ## 🕹️ Como Jogar
 
-* **Seta para cima/baixo/esquerda/direita:** Navegar nas opções do menu.
-* **Enter:** Selecionar uma opção.
-* **ESC:** Pausar o jogo ou voltar.
+* **Seta para cima/baixo/esquerda/direita:** ou **W,A,S,D** = Movimentação do personagem.
+* **Botão erquerdo do Mouse** = Selecionar a carta.
+* **Enter:** = Atacar com as cartas.
+* **+ & -** = Alterar o Volume do jogo.
+* **ESC:** = Sair do jogo ou voltar.
 
 <br>
 
@@ -66,8 +68,8 @@ Este projeto foi concebido e desenvolvido por uma equipe talentosa e dedicada.
 
 ### 💻 Programação
 * [Daniel Monteiro]
-* [Jean Karia]
 * [Gabriel Kenji]
+* [Jean Karia]
 
 ### 🎨 Design Gráfico
 * [João Mateus]
