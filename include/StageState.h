@@ -29,7 +29,8 @@ private:
     std::vector<std::shared_ptr<GameObject>> cards;
     GameMode currentMode;
     Timer modeTimer;
-    float modeDuration = 10.0f; // tempo de duração de cada fase
+    float modeCardDuration = 20.0f; // tempo de duração de cada fase
+    float modeActionDuration = 10.0f;
     bool cardsSpawned = false;
 
 };

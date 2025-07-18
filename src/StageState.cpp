@@ -106,17 +106,16 @@ void StageState::Update(float dt) {
 
     modeTimer.Update(dt);
 
-    if (modeTimer.Get() > modeDuration) {
-        if (currentMode == CARD_MODE) {
-            currentMode = ACTION_MODE;
-            //std::cout << "[MODO] Ação iniciada!" << std::endl;
-        } else {
-            currentMode = CARD_MODE;
-            std::cout << "[MODO] Cartas iniciada!" << std::endl;
-        }
 
+    if (currentMode == CARD_MODE && modeTimer.Get() > modeCardDuration){
+        currentMode = ACTION_MODE;
         modeTimer.Restart();
+    } else if (currentMode == ACTION_MODE && modeTimer.Get() > modeActionDuration){
+        currentMode = CARD_MODE;
+        modeTimer.Restart();
+
     }
+
 
     if (currentMode == CARD_MODE && !cardsSpawned) {
         cards.clear();
