@@ -6,32 +6,40 @@
 #include "Camera.h"
 #include "InputManager.h"
 
-EndState::EndState(){
+EndState::EndState() {
     GameObject* bg = new GameObject();
 
     if (GameData::playerVictory) {
         backgroundMusic.Open("Recursos/audio/endStateWin.ogg");
-        SpriteRenderer* sr = new SpriteRenderer(*bg, "Recursos/img/Win.png");
+
+        SpriteRenderer* sr = new SpriteRenderer(*bg, "Recursos/img/Cena_vitoria.png");
         sr->SetCameraFollower(true);
+
+        // Ajuste de escala para cobrir a tela inteira
+        float screenW = Game::GetInstance().GetWidth();
+        float screenH = Game::GetInstance().GetHeight();
+        float imageW = sr->GetWidth();
+        float imageH = sr->GetHeight();
+
+        float scaleX = screenW / imageW;
+        float scaleY = screenH / imageH;
+        sr->SetScale(scaleX, scaleY);
+
+        // Centralizar a imagem
+        bg->box.x = 0;
+        bg->box.y = 0;
+        bg->box.w = screenW;
+        bg->box.h = screenH;
+
         bg->AddComponent(sr);
     } else {
         backgroundMusic.Open("Recursos/audio/endStateLose.ogg");
-
     }
 
     AddObject(bg);
 
-    GameObject* textGO = new GameObject();
-    textGO->box.x = Game::GetInstance().GetWidth()/2 - 150;
-    textGO->box.y = Game::GetInstance().GetHeight()/2 - 100;
-
-    textGO->AddComponent(new Text(*textGO, "Recursos/font/neodgm.ttf", 80, Text::SOLID, 
-                              "", {255, 255, 255, 255}));
-
-
-
-    AddObject(textGO);
 }
+
 
 EndState::~EndState() {
     objectArray.clear();

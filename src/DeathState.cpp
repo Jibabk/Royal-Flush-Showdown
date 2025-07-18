@@ -85,7 +85,6 @@ void DeathState::Update(float dt) {
 
     if (!moving && animTimer.Get() > 1.5f) {
         GameData::playerVictory = false;
-        Game::GetInstance().Push(new EndState());
     }
 }
     SDL_Event event;
