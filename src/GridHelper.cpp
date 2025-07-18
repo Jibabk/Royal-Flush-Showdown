@@ -46,3 +46,16 @@ GridPosition MapToGrid(Vec2 worldPosition) {
     // Retorna os melhores índices encontrados
     return {best_row_index, best_col_index};
 }
+Vec2 GetTileWorldPosition(int row, int col) {
+    const std::vector<float> col_coords = {200, 280, 360, 440, 520, 600, 680, 760};
+    const std::vector<float> row_coords = {347, 412, 477, 542, 591};
+
+    // Verifica se os índices são válidos para evitar erros
+    if (row < 0 || row >= row_coords.size() || col < 0 || col >= col_coords.size()) {
+        // Retorna uma posição padrão ou de erro se os índices forem inválidos
+        return Vec2(0, 0); 
+    }
+
+    // Retorna as coordenadas do mundo para o tile especificado
+    return Vec2(col_coords[col], row_coords[row]);
+}
