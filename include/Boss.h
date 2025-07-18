@@ -21,7 +21,7 @@ public:
     void NotifyCollision(GameObject& other) override;
     class Command {
     public:
-        enum CommandType { MOVE, SHOOT_LEFT, SHOOT_RIGHT };
+        enum CommandType { MOVE, SHOOT_LEFT, SHOOT_RIGHT, SHOOT_BOTH, CARD_SPRING, POSITION_HANDS_FOR_LASER};
         CommandType type;
         Vec2 pos;
 
@@ -38,6 +38,10 @@ public:
         speed = newSpeed;
         linearSpeed = speed.Magnitude();
     }
+    float GetHpPercent() const {
+    return currentHp / (float)maxHp;
+}
+
 
 
 private:
@@ -55,6 +59,12 @@ private:
     bool isDead = false;
     Sound deathSound;
     Sound hitSound;
+    Timer handReturnTimer;
+    bool waitingToReturnHands = false;
+    bool preparingCardSpring = false;
+    bool waitingHandsReturn = false;
+
+
 };
 
 #endif
