@@ -224,7 +224,7 @@ void Character::Update(float dt) {
 
 void Character::Render() {
     // Desenha os corações (vida) no canto superior esquerdo da tela
-    SDL_Texture* heartTex = Resources::GetImage("Recursos/img/cartinha.png");
+    SDL_Texture* heartTex = Resources::GetImage("Recursos/img/vida.png");
     if (!heartTex) return;
 
     SDL_Renderer* renderer = Game::GetInstance().GetRenderer();

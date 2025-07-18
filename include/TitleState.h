@@ -4,6 +4,8 @@
 #include "State.h"
 #include "GameObject.h"
 #include "Rect.h"
+#include "Music.h"
+#include "Timer.h"
 
 class TitleState : public State {
 public:

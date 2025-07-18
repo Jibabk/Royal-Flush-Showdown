@@ -4,6 +4,8 @@
 #include "StageState.h"
 #include "SpriteRenderer.h"
 #include "Camera.h"
+#include "Music.h"
+#include "Timer.h"
 
 TitleState::TitleState() : backgroundMusic("Recursos/audio/menu.wav"){
     Camera::pos = {0, 0};
@@ -29,7 +31,8 @@ TitleState::TitleState() : backgroundMusic("Recursos/audio/menu.wav"){
 
     // Define áreas clicáveis com base na imagem:
     jogarArea = Rect(150, 360, 200, 75); // ajuste fino conforme a imagem
-    sairArea = Rect(150, 465, 200, 75);  // ajuste fino conforme a imagem    
+    sairArea = Rect(150, 465, 200, 75);  // ajuste fino conforme a imagem
+        
     backgroundMusic.SetVolume(64); // Define o volume da música para 100%, volume de 0 a 128
     backgroundMusic.Play(); // Toca a música em loop
 
