@@ -33,7 +33,7 @@ EndState::EndState() {
 
         bg->AddComponent(sr);
     } else {
-        backgroundMusic.Open("Recursos/audio/endStateLose.ogg");
+        backgroundMusic.Open("Recursos/audio/menu.wav");
     }
 
     AddObject(bg);
