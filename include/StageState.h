@@ -31,6 +31,7 @@ private:
     Timer modeTimer;
     float modeDuration = 10.0f; // tempo de duração de cada fase
     bool cardsSpawned = false;
+    std::vector<std::weak_ptr<GameObject>> cardHudObjects;
 
 };
 

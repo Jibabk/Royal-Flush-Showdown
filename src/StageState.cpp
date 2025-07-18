@@ -106,6 +106,9 @@ void StageState::Update(float dt) {
 
     modeTimer.Update(dt);
 
+    float screenW = Game::GetInstance().GetWidth();
+    float screenH = Game::GetInstance().GetHeight();
+
     if (modeTimer.Get() > modeDuration) {
         if (currentMode == CARD_MODE) {
             currentMode = ACTION_MODE;
@@ -118,35 +121,80 @@ void StageState::Update(float dt) {
         modeTimer.Restart();
     }
 
-    if (currentMode == CARD_MODE && !cardsSpawned) {
-        cards.clear();
+if (currentMode == CARD_MODE && !cardsSpawned) {
 
-        for (int i = 0; i < 5; i++) {
-            Card card = deck.Draw();
-            GameObject* cardGO = new GameObject();
-            cardGO->box.x = 100 + i * 150;
-            cardGO->box.y = 800;
-            
 
-            SpriteRenderer* renderer = new SpriteRenderer(*cardGO, card.GetImagePath(), 1, 1);
-            renderer->SetScale(1, 1);
-            cardGO->AddComponent(renderer);
+    // Fundo com imagem completa do menu
+    GameObject* bg = new GameObject();
+    SpriteRenderer* bgSprite = new SpriteRenderer(*bg, "Recursos/img/fundo_placeholder.png");
+    bgSprite->SetCameraFollower(true);
 
-            CardComponent* cardComp = new CardComponent(*cardGO, card);
-            cardComp->selected = true;  // Inicialmente não selecionada
-            cardGO->AddComponent(cardComp);
+    // Ajusta escala da imagem para o tamanho da tela
+    float screenW = Game::GetInstance().GetWidth();
+    float screenH = Game::GetInstance().GetHeight();
+    float imageW = bgSprite->GetWidth();
+    float imageH = bgSprite->GetHeight();
 
-            std::weak_ptr<GameObject> weak = AddObject(cardGO);
-            if (auto shared = weak.lock()) {
-                cards.push_back(shared);
-            }
+    float scaleX = screenW / imageW;
+    float scaleY = screenH / imageH;
+
+    bgSprite->SetScale(scaleX, scaleY);
+    bg->AddComponent(bgSprite);
+    cardHudObjects.push_back(AddObject(bg));
+
+    // Boss no topo
+    GameObject* hudBoss = new GameObject();
+    hudBoss->box.x = 360;
+    hudBoss->box.y = 50;
+    // centralizado
+    SpriteRenderer* bossRenderer = new SpriteRenderer(*hudBoss, "Recursos/img/boss_v2.png",2,1);
+    bossRenderer->SetFrame(1,SDL_FLIP_NONE);          // <- segundo sprite
+    bossRenderer->SetScale(2, 2); // dobra o tamanho
+    hudBoss->AddComponent(bossRenderer);
+
+    cardHudObjects.push_back(AddObject(hudBoss));
+
+    // Limpa cartas anteriores (por segurança)
+    cards.clear();
+
+    // Posição das cartas no centro da tela
+    const int CARD_WIDTH = 100;     // ajuste conforme o sprite real
+    const int CARD_SPACING = 30;
+    const int TOTAL_WIDTH = 5 * CARD_WIDTH + 4 * CARD_SPACING;
+    const int START_X = (screenW - TOTAL_WIDTH) / 2;
+    const int CARD_Y = 350;
+
+    for (int i = 0; i < 5; i++) {
+        Card card = deck.Draw();
+        GameObject* cardGO = new GameObject();
+
+        // Alinha horizontalmente
+        cardGO->box.x = START_X + i * (CARD_WIDTH + CARD_SPACING);
+        cardGO->box.y = CARD_Y;
+
+        SpriteRenderer* renderer = new SpriteRenderer(*cardGO, card.GetImagePath(), 1, 1);
+        renderer->SetScale(1.5, 1.5);  // ajuste se necessário
+        cardGO->AddComponent(renderer);
+
+        CardComponent* cardComp = new CardComponent(*cardGO, card);
+        cardComp->selected = true;
+        cardGO->AddComponent(cardComp);
+
+        std::weak_ptr<GameObject> weak = AddObject(cardGO);
+        if (auto shared = weak.lock()) {
+            cards.push_back(shared);
         }
-
-        cardsSpawned = true;
     }
 
+    cardsSpawned = true;
+}
+
     if (currentMode == ACTION_MODE) {
-        //std::cout << "[MODO] Ação iniciada!" << std::endl;
+        std::cout << "[MODO] Ação iniciada!" << std::endl;
+        for (auto& obj : cardHudObjects) {
+    if (auto shared = obj.lock()) shared->RequestDelete();
+    }
+    cardHudObjects.clear();
 
         // Remove cartas
         for (auto& card : cards) {
@@ -229,7 +277,7 @@ void StageState::Update(float dt) {
                 newGO->box = cards[i]->box;  // mantém a posição anterior
 
                 SpriteRenderer* renderer = new SpriteRenderer(*newGO, newCard.GetImagePath(), 1, 1);
-                renderer->SetScale(1, 1);
+                renderer->SetScale(2, 2);
                 newGO->AddComponent(renderer);
                 newGO->AddComponent(new CardComponent(*newGO, newCard));
 
@@ -244,6 +292,9 @@ void StageState::Update(float dt) {
         }
     }
 
+    if (currentMode == CARD_MODE) {
+    return; // cancela o update de comportamento
+}
 
 
     UpdateArray(dt);
@@ -289,7 +340,6 @@ void StageState::Update(float dt) {
 }
 
 void StageState::Render() {
-    bg.Render(0, 0, 0);
     RenderArray();
 }
 
