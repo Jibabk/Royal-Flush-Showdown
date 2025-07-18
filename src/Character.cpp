@@ -21,7 +21,7 @@ Character* Character::player = nullptr;
 int Character::npcCount = 0;
 
 Character::Character(GameObject& associated, std::string sprite)
-    : Component(associated), speed(0, 0), linearSpeed(0), hp(3), 
+    : Component(associated), speed(0, 0), linearSpeed(0), hp(5), 
       deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav") {
 
     

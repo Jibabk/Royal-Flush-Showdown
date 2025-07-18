@@ -21,9 +21,17 @@ public:
     enum GameMode { CARD_MODE, ACTION_MODE };
     GameMode GetCurrentMode() const { return currentMode; }
 
+    void ResetBossMusic() { 
+        bossMusicTriggered = false; 
+        bossMusic.Stop();
+        backgroundMusic.Play();
+    }
+
 private:
     TileSet* tileSet;
     Music backgroundMusic;
+    Music bossMusic;  // Nova música para quando o Boss está com metade da vida
+    bool bossMusicTriggered;  // Flag para controlar se já foi ativada
     Sprite bg;
     Deck deck;
     std::vector<std::shared_ptr<GameObject>> cards;

@@ -21,7 +21,7 @@
 #include <Card.h>
 #include <PokerHand.h>
 
-StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"),deck(Deck()),cards() {
+StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"),bossMusic("Recursos/audio/gameplay+ataque.wav"), bossMusicTriggered(false), deck(Deck()),cards() {
     // Background
     GameObject* bg = new GameObject();
     SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/background1.png");
@@ -82,9 +82,13 @@ StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"),deck(D
 
     backgroundMusic.SetVolume(64); // Define o volume da música para 100%, volume de 0 a 128
     backgroundMusic.Play(); // Toca a música em loop
+    // Configura a música do Boss mas não toca ainda
+    bossMusic.SetVolume(64);
 }
 
 StageState::~StageState() {
+    backgroundMusic.Stop();
+    bossMusic.Stop();           // Para a música do Boss também
     objectArray.clear();
 }
 
@@ -175,6 +179,20 @@ void StageState::Update(float dt) {
     int currentVol = Mix_VolumeMusic(-1);
     backgroundMusic.SetVolume(currentVol - 8);
     std::cout << "Volume atual: " << Mix_VolumeMusic(-1) << std::endl;
+    }
+
+    // Verifica se o Boss está com metade da vida
+    if (Boss::chefe && !bossMusicTriggered) {
+        if (Boss::chefe->GetHP() <= Boss::chefe->GetMaxHP() / 2) {
+            // Para a música de fundo atual
+            backgroundMusic.Stop();
+            
+            // Inicia a música do Boss
+            bossMusic.Play();
+            
+            bossMusicTriggered = true;
+            std::cout << "[MÚSICA] Boss Music iniciada - Boss com metade da vida!" << std::endl;
+        }
     }
 
 

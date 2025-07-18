@@ -31,6 +31,9 @@ public:
     static Boss* chefe;
     void Issue(Command task);
 
+    int GetHP() const { return hp; }
+    int GetMaxHP() const { return maxHp; }
+
     void TakeDamage(int damage);
     bool IsDead() const { return isDead; }
 
