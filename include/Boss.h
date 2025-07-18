@@ -7,6 +7,8 @@
 #include "Vec2.h"
 #include "Timer.h"
 #include "Sound.h"
+#include "Text.h"
+
 
 class Boss : public Component {
 public:
@@ -48,6 +50,14 @@ private:
     std::weak_ptr<GameObject> gunLeft;
     std::weak_ptr<GameObject> gunRight;
     std::queue<Command> taskQueue;
+
+    // Texto do Boss
+    std::weak_ptr<GameObject> bossText;
+
+    // Método para criar o texto
+    void CreateBossText();
+    void UpdateBossText();
+
     Vec2 speed;
     float linearSpeed;
     int hp;

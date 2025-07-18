@@ -15,6 +15,8 @@
 #include <iostream>
 #include <TileExplosionAttack.h>
 #include <GridHelper.h>
+#include "Text.h"      
+
 
 Boss* Boss::chefe = nullptr;
 Vec2 inicialHandPos = Vec2(160, 40);
@@ -42,11 +44,21 @@ Boss::Boss(GameObject& associated, std::string sprite)
         chefe = this;
 
     
+    // Criar o texto ao lado do Boss
+    CreateBossText();
+
+
+    
 }
 
 Boss::~Boss() {
     if (chefe == this) {
         chefe = nullptr;
+    }
+
+    // Limpar referência do texto
+    if (auto textPtr = bossText.lock()) {
+        textPtr->RequestDelete();
     }
 
 }
@@ -64,6 +76,11 @@ void Boss::Start() {
     gunGO2->box = associated.box;
     gunGO2->AddComponent(new Gun(*gunGO2, state.GetObjectPtr(&associated),Vec2(inicialHandPos.x, inicialHandPos.y), true));
     gunRight = state.AddObject(gunGO2);
+
+    // Criar o texto se ainda não foi criado
+    if (bossText.expired()) {
+        CreateBossText();
+    }
 
     
 }
@@ -102,12 +119,45 @@ Vec2 AjustTileExplosion(std::pair<GridPosition, Vec2> tile) {
     return pos;
 }
 
+void Boss::CreateBossText() {
+    auto& state = Game::GetInstance().GetCurrentState();
+    
+    // Criar GameObject para o texto
+    GameObject* textGO = new GameObject();
+    
+    // Definir cor do texto (branco)
+    SDL_Color white = {255, 255, 255, 255};
+    
+    // Posicionar o texto ao lado direito do Boss
+    textGO->box.x = associated.box.x + associated.box.w + 20; // 20 pixels à direita
+    textGO->box.y = associated.box.y + associated.box.h / 2;  // Centro vertical
+    
+    // Criar o componente Text
+    std::string bossLabel = "BOSS";
+    textGO->AddComponent(new Text(*textGO, "Recursos/font/neodgm.ttf", 24, Text::BLENDED, bossLabel, white));
+    
+    // Adicionar ao estado e guardar referência
+    bossText = state.AddObject(textGO);
+}
+
+void Boss::UpdateBossText() {
+    auto textPtr = bossText.lock();
+    if (textPtr) {
+        // Atualizar posição do texto para acompanhar o Boss
+        textPtr->box.x = associated.box.x + associated.box.w + 20;
+        textPtr->box.y = associated.box.y + associated.box.h / 2;
+    }
+}
+
+
 void Boss::Update(float dt) {
     Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
     auto& state = Game::GetInstance().GetCurrentState();
     StageState* stage = dynamic_cast<StageState*>(&state);
 
-    
+    // Atualizar posição do texto
+    UpdateBossText();
+
     damageCooldown.Update(dt);
     if (hp <= 0) {
         auto gunPtrL = gunLeft.lock();
