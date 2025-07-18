@@ -50,8 +50,9 @@ Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relat
     animator->AddAnimation("attack1_flip", Animation(31, 36, 6, SDL_FLIP_HORIZONTAL));
     animator->AddAnimation("attack2Send", Animation(46, 58, 6));
     animator->AddAnimation("attack2Recive", Animation(61, 67, 6));
-    animator->AddAnimation("attack3", Animation(76, 89, 6));
-    animator->AddAnimation("attack3_flip", Animation(76, 89, 6, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("attack3Ready", Animation(76, 78, 6));
+    animator->AddAnimation("attack3Set", Animation(78, 81, 6));
+    animator->AddAnimation("attack3Go", Animation(81, 89, 6));
 
     animator->SetAnimation("idle");
     associated.AddComponent(animator);
@@ -110,13 +111,24 @@ void Gun::Update(float dt) {
             FireBullet(targetPos);
         } else if(previousState == HIGH_CARD){
             ShootHigh(targetPos);
+        } else if(previousState == PREPARING){
+            PunchTravel(targetPos);
+        } else if(previousState == TRAVELING){
+            PunchAttack(targetPos);
         } else if(previousState == PUNCHING){
-            // Aqui você pode adicionar a lógica para o ataque de soco, se necessário
+            ResetOffset();
+        } else if(previousState == EMOTING){
+            Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+            if (rightHand) {
+                animator->SetAnimation("emote" + std::to_string(rand() % 6) + "_flip");
+            } else {
+                animator->SetAnimation("emote" + std::to_string(rand() % 6));
+            }
         }
         attackTarget = Vec2(0, 0); // Reseta o alvo após disparar
     }
     
-
+    
     
 }
 
@@ -199,19 +211,43 @@ void Gun::HighCard(Vec2 target){
     animationTimer.Restart();
 }
 
-void Gun::Punch(Vec2 target){
+void Gun::PunchReady(Vec2 target) {
+    if (cdTimer.Get() < cooldown / 1000.0f) return;
+    Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+    currentState = PREPARING;
+    previousState = currentState;
+    animator->SetAnimation("attack3Ready");
+    //attackTarget = target;
+    animationTimer.Restart();
+    SetOffset(Vec2(target.x, target.y - 500));
+
+}
+
+void Gun::PunchTravel(Vec2 target) {
+    if (cdTimer.Get() < cooldown / 1000.0f) return;
+    Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
+    currentState = TRAVELING;
+    previousState = currentState;
+    animator->SetAnimation("attack3Set");
+    //attackTarget = target;
+    animationTimer.Restart();
+}
+
+void Gun::PunchAttack(Vec2 target) {
     if (cdTimer.Get() < cooldown / 1000.0f) return;
     Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
     currentState = PUNCHING;
     previousState = currentState;
-    if (rightHand) {
-        animator->SetAnimation("attack3_flip");
-    } else {
-        animator->SetAnimation("attack3");
-    }
+    animator->SetAnimation("attack3Go");
     attackTarget = target;
     animationTimer.Restart();
+    SetOffset(target);
 }
+
+
+
+
+    
 
 void Gun::SetOffset(Vec2 offset) {
     targetOffset = offset;

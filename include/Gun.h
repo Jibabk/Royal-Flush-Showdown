@@ -22,8 +22,15 @@ public:
     void SetOffsetPath(const std::vector<Vec2>& path);
     bool UpdateOffsetPath(float dt);
     bool AdvanceOffsetStep();
+    void StartPunchSequence(Vec2 B, Vec2 C);
     void HighCard(Vec2 target);
     void Punch(Vec2 target);
+
+    void PunchTravel(Vec2 target);
+
+    void PunchAttack(Vec2 target);
+
+    void PunchReady(Vec2 target);
 
 private:
     Sound shotSound;
@@ -39,13 +46,23 @@ private:
     std::vector<Vec2> offsetPath;
     int currentOffsetIndex = 0;
     bool rightHand;
-    enum GunState { IDLE, SHOOTING, HIGH_CARD, PUNCHING, EMOTING };
+    enum GunState { IDLE, SHOOTING, HIGH_CARD, PUNCHING, EMOTING , TRAVELING , PREPARING};
     GunState currentState;
     GunState previousState = IDLE;
     Vec2 attackTarget;
     Timer animationTimer;
     void FireBullet(Vec2 target);
     void ShootHigh(Vec2 target);
+    enum PunchPhase {
+    PUNCH_NONE,
+    PUNCH_A_TO_B,
+    PUNCH_B_ANIM,
+    PUNCH_B_TO_C,
+    PUNCH_FINISH
+};
+
+PunchPhase punchPhase = PUNCH_NONE;
+
 };
 
 #endif

@@ -241,25 +241,37 @@ void Boss::Update(float dt) {
 
             }
         } else if (cmd.type == Command::PUNCH){
-            GridPosition playerTile = MapToGrid(cmd.pos);
-            //std::vector <std::pair<int,int>> attackAreas= {{0,0},{0,1},{0,-1},{1,0},{-1,0}};
-            std::vector <std::pair<int,int>> attackAreas= {{0,0},{0,1},{0,-1},{1,0},{-1,0},{-1,-1},{-1,1},{-2,-1},{-2,1},{-1,2},{-1,-2}};
-            for (const auto& area : attackAreas) {
-                GridPosition attackGridPos = {playerTile.row + area.first, playerTile.col + area.second};
-                Vec2 targetPosition = GetTileWorldPosition(attackGridPos.row, attackGridPos.col);
-                targetPosition = AjustTileExplosion({attackGridPos, targetPosition});
-                GameObject* explosionGO = new GameObject();
-                explosionGO->box.x = targetPosition.x - explosionGO->box.w / 2;
-                explosionGO->box.y = targetPosition.y - explosionGO->box.h / 2;
-                explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 3.0f));
-                state.AddObject(explosionGO);
-            }
-            std::cout << "Tile explosion attack created at: (" << playerTile.row << ", " << playerTile.col << ")\n";
+            auto gunA = gunLeft.lock();
 
+            if (gunA) {
+                Gun* gunCompA = static_cast<Gun*>(gunA->GetComponent("Gun"));
+                if (gunCompA) {
+
+                
+                    GridPosition playerTile = MapToGrid(cmd.pos);
+                    Vec2 targetPosition = GetTileWorldPosition(playerTile.row, playerTile.col);
+                    targetPosition = AjustTileExplosion({playerTile, targetPosition});
+                    gunCompA->PunchReady(targetPosition);
+
+                    //std::vector <std::pair<int,int>> attackAreas= {{0,0},{0,1},{0,-1},{1,0},{-1,0}};
+                    std::vector <std::pair<int,int>> attackAreas= {{0,0},{0,1},{0,-1},{1,0},{-1,0},{-1,-1},{-1,1},{-2,-1},{-2,1},{-1,2},{-1,-2}};
+                    for (const auto& area : attackAreas) {
+                        GridPosition attackGridPos = {playerTile.row + area.first, playerTile.col + area.second};
+                        Vec2 targetPosition = GetTileWorldPosition(attackGridPos.row, attackGridPos.col);
+                        targetPosition = AjustTileExplosion({attackGridPos, targetPosition});
+                        GameObject* explosionGO = new GameObject();
+                        explosionGO->box.x = targetPosition.x - explosionGO->box.w / 2;
+                        explosionGO->box.y = targetPosition.y - explosionGO->box.h / 2;
+                        explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 3.0f));
+                        state.AddObject(explosionGO);
+                    }
+                    std::cout << "Tile explosion attack created at: (" << playerTile.row << ", " << playerTile.col << ")\n";
+
+                }
+                }
+            }
 
         }
-
-    }
     }
 
 

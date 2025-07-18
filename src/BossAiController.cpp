@@ -90,10 +90,10 @@ void BossAiController::Update(float dt) {
 
         switch (attack) {
             case 0:
-                boss->Issue(Boss::Command(Boss::Command::HIGH_CARD, playerPos.x, playerPos.y));  //SHOOT_LEFT
+                boss->Issue(Boss::Command(Boss::Command::PUNCH, playerPos.x, playerPos.y));  //SHOOT_LEFT
                 break;
             case 1:
-                boss->Issue(Boss::Command(Boss::Command::HIGH_CARD, playerPos.x, playerPos.y)); //SHOOT_RIGHT
+                boss->Issue(Boss::Command(Boss::Command::PUNCH, playerPos.x, playerPos.y)); //SHOOT_RIGHT
                 break;
             case 2:
                 boss->Issue(Boss::Command(Boss::Command::SHOOT_BOTH, playerPos.x, playerPos.y));  //SHOOT_BOTH

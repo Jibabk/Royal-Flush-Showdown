@@ -15,12 +15,12 @@ public:
     }
 
     bool OverlapsWith(const Rect& other) const {
-        std::cout << "Checking overlap with Rect: (x: " 
-                  << other.x << ", y: " << other.y << ", w: " 
-                  << other.w << ", h: " << other.h << ")\n";
-        std::cout << "Current Rect: (x: " 
-                  << x << ", y: " << y << ", w: "
-                  << w << ", h: " << h << ")\n";
+        //std::cout << "Checking overlap with Rect: (x: " 
+        //          << other.x << ", y: " << other.y << ", w: " 
+        //          << other.w << ", h: " << other.h << ")\n";
+        //std::cout << "Current Rect: (x: " 
+        //          << x << ", y: " << y << ", w: "
+        //          << w << ", h: " << h << ")\n";
         // Verifica se há interseção entre dois retângulos
         return x < other.x + other.w &&
                x + w > other.x &&
