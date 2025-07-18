@@ -186,6 +186,35 @@ if (currentMode == CARD_MODE && !cardsSpawned) {
         }
     }
 
+        // Botões abaixo das cartas
+    const int BUTTON_WIDTH = 100;
+    const int BUTTON_HEIGHT = 50;
+    const int BUTTON_SPACING = 50;
+    const int BUTTON_Y = CARD_Y + 170;  // distância abaixo das cartas
+    int centerX = screenW / 2;
+
+
+    // Botão "Descartar"
+    GameObject* discardButton = new GameObject();
+    discardButton->box.x = centerX - BUTTON_WIDTH - BUTTON_SPACING / 2;
+    discardButton->box.y = BUTTON_Y;
+    SpriteRenderer* discardRenderer = new SpriteRenderer(*discardButton, "Recursos/img/btn_descartar.png",2,1);
+    discardRenderer->SetFrame(0,SDL_FLIP_NONE);
+    discardRenderer->SetScale(1.5, 1.5);  // se quiser aumentar
+    discardButton->AddComponent(discardRenderer);
+    cardHudObjects.push_back(AddObject(discardButton));
+
+    // Botão "Jogar"
+    GameObject* playButton = new GameObject();
+    playButton->box.x = centerX + BUTTON_SPACING / 2;
+    playButton->box.y = BUTTON_Y;
+    SpriteRenderer* playRenderer = new SpriteRenderer(*playButton, "Recursos/img/btn_confirmar.png",2,1);
+    playRenderer->SetFrame(0,SDL_FLIP_NONE);
+    playRenderer->SetScale(1.5, 1.5);
+    playButton->AddComponent(playRenderer);
+    cardHudObjects.push_back(AddObject(playButton));
+
+
     cardsSpawned = true;
 }
 
