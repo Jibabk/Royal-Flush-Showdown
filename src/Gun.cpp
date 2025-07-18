@@ -23,7 +23,7 @@ Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relat
       rightHand(rightHand)
  {
 
-    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/Maos_Spritesheet_beta.png", 13, 5);
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/Maos.png", 15, 6);
     spriteRenderer->SetScale(2, 2); // Ajusta o tamanho do sprite
     associated.AddComponent(spriteRenderer);
 
@@ -32,8 +32,8 @@ Gun::Gun(GameObject& associated, std::weak_ptr<GameObject> character, Vec2 relat
         associated.box.x += associated.box.w; // Ajusta a posição para a mão direita
     }
     Animator* animator = new Animator(associated);
-    animator->AddAnimation("idle", Animation(0, 0, 0));
-    animator->AddAnimation("idle_flip", Animation(0, 0, 0, SDL_FLIP_VERTICAL));
+    animator->AddAnimation("idle", Animation(15, 20, 5));
+    animator->AddAnimation("idle_flip", Animation(0, 4, 5, SDL_FLIP_VERTICAL));
     animator->AddAnimation("reloading", Animation(1, 1, 0.2));
     animator->AddAnimation("reloading_flip", Animation(1, 1, 0.2, SDL_FLIP_VERTICAL));
 
@@ -119,9 +119,9 @@ void Gun::Shoot(Vec2 target) {
     GameObject* bulletGO = new GameObject();
     bulletGO->box.x = associated.box.x + associated.box.w / 2 - 5; // centraliza a bala
     bulletGO->box.y = associated.box.y + associated.box.h / 2 - 5; // centraliza a bala
-    bulletGO->AddComponent(new SpriteRenderer(*bulletGO, "Recursos/img/cartinha.png", 3, 2));
-    bulletGO->AddComponent(new Animator(*bulletGO));
-    bulletGO->AddComponent(new Bullet(*bulletGO, angle, 500, 10, 1000,targetsPlayer)); // velocidade, dano, distância máxima
+    //bulletGO->AddComponent(new SpriteRenderer(*bulletGO, "Recursos/img/Carta.png", 3, 2));
+    //bulletGO->AddComponent(new Animator(*bulletGO));
+    bulletGO->AddComponent(new Bullet(*bulletGO, angle, 100, 10, 1000,targetsPlayer)); // velocidade, dano, distância máxima
     state.AddObject(bulletGO);  // adiciona a bala ao estado
     reloadSound.Play(1);  // toca som de recarga
 }

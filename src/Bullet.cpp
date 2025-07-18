@@ -13,10 +13,14 @@ Bullet::Bullet(GameObject& associated, float angle, float speed, int damage, flo
     : Component(associated){
 
     associated.angleDeg = angle;
-    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/cartinha.png", 1, 1);
-    associated.AddComponent(new Collider(associated));
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/Carta.png", 1, 1);
+    
     spriteRenderer->SetScale(1,1);
     associated.AddComponent(spriteRenderer);
+    
+    associated.AddComponent(new Collider(associated));
+
+ 
     
     Vec2 direction(0, 0);
     this->speed = Vec2(std::cos(angle * M_PI / 180.0f), std::sin(angle * M_PI / 180.0f)) * speed;

@@ -1,17 +1,20 @@
-// GridHelper.h ou similar
+// GridHelper.h
 
-#ifndef GRIDHELPER_H
-#define GRIDHELPER_H
+#ifndef GRID_HELPER_H
+#define GRID_HELPER_H
 
-#include "Vec2.h" // Inclua o seu ficheiro de vetor
+#include "Vec2.h"
 
-// Estrutura para armazenar o resultado: a fileira e a coluna na grade.
 struct GridPosition {
-    int row; // Índice da fileira (de 0 a 4)
-    int col; // Índice da coluna (de 0 a 7)
+    int row;
+    int col;
 };
 
-// Declaração da função
+// Função existente
 GridPosition MapToGrid(Vec2 worldPosition);
+
+// --- NOVA FUNÇÃO ---
+// Retorna as coordenadas do centro de um tile com base nos seus índices.
+Vec2 GetTileWorldPosition(int row, int col);
 
 #endif

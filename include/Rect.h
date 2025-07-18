@@ -2,6 +2,7 @@
 #define RECT_H
 
 #include "Vec2.h"
+#include <iostream>
 class Rect {
 public:
     float x, y, w, h;
@@ -12,6 +13,22 @@ public:
         return (point.x >= x && point.x <= x + w &&
                 point.y >= y && point.y <= y + h);
     }
+
+    bool OverlapsWith(const Rect& other) const {
+        std::cout << "Checking overlap with Rect: (x: " 
+                  << other.x << ", y: " << other.y << ", w: " 
+                  << other.w << ", h: " << other.h << ")\n";
+        std::cout << "Current Rect: (x: " 
+                  << x << ", y: " << y << ", w: "
+                  << w << ", h: " << h << ")\n";
+        // Verifica se há interseção entre dois retângulos
+        return x < other.x + other.w &&
+               x + w > other.x &&
+               y < other.y + other.h &&
+               y + h > other.y;
+    }
+
+
 
     Vec2 Center() const {
         return Vec2(x + w / 2.0f, y + h / 2.0f);
