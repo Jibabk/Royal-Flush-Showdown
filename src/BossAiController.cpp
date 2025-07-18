@@ -28,7 +28,7 @@ int AttackPattern1() { // 33% de chance de atacar com as duas
     return AttackPattern0();
 }
 
-int AttackPattern2() { // 20% de chance de atacar com o Card Spring
+int AttackPattern2() { // 20% de chance de atacar com o High Card
     int chance = rand() % 5;
     if (chance == 0) {
         return 3;
@@ -36,13 +36,34 @@ int AttackPattern2() { // 20% de chance de atacar com o Card Spring
     return AttackPattern1();
 }
 
+int AttackPattern3() { // 20% de chance de atacar com o Card Spring
+    int chance = rand() % 5;
+    if (chance == 0) {
+        return 4;
+    } 
+    return AttackPattern2();
+}
+
+int AttackPattern4() { // 20% de chance de atacar com o Laser
+    int chance = rand() % 5;
+    if (chance == 0) {
+        return 5;
+    } 
+    return AttackPattern3();
+}
+
 int getAttack(int currentHp){
-    if (currentHp < 50) {
-        return AttackPattern2();
+
+    if (currentHp < 30) {
+        return AttackPattern4();
+    } else if (currentHp < 50) {
+        return AttackPattern3();
     } else if (currentHp < 70) {
+        return AttackPattern2(); 
+    } else if (currentHp < 90){
         return AttackPattern1(); 
     } else {
-        return AttackPattern0(); 
+        return AttackPattern0();
     }
 }
 
@@ -72,13 +93,22 @@ void BossAiController::Update(float dt) {
                 boss->Issue(Boss::Command(Boss::Command::SHOOT_LEFT, playerPos.x, playerPos.y));  //SHOOT_LEFT
                 break;
             case 1:
-                boss->Issue(Boss::Command(Boss::Command::POSITION_HANDS_FOR_LASER, playerPos.x, playerPos.y)); //SHOOT_RIGHT
+                boss->Issue(Boss::Command(Boss::Command::SHOOT_RIGHT, playerPos.x, playerPos.y)); //SHOOT_RIGHT
                 break;
             case 2:
-                boss->Issue(Boss::Command(Boss::Command::CARD_SPRING, playerPos.x, playerPos.y));  //SHOOT_BOTH
+                boss->Issue(Boss::Command(Boss::Command::SHOOT_BOTH, playerPos.x, playerPos.y));  //SHOOT_BOTH
                 break;
             case 3:
-                boss->Issue(Boss::Command(Boss::Command::CARD_SPRING, playerPos.x, playerPos.y)); //CARD_SPRING
+                boss->Issue(Boss::Command(Boss::Command::HIGH_CARD, playerPos.x, playerPos.y)); //HIGH_CARD
+                break;
+            case 4:
+                boss->Issue(Boss::Command(Boss::Command::POSITION_HANDS_FOR_LASER, playerPos.x, playerPos.y)); //POSITION_HANDS_FOR_LASER
+                break;
+            case 5:
+                boss->Issue(Boss::Command(Boss::Command::PUNCH, playerPos.x, playerPos.y)); //PUNCH
+                break;  
+            default:
+                std::cerr << "Unknown attack pattern: " << attack << std::endl;
                 break;
         }
         restTimer.Restart();

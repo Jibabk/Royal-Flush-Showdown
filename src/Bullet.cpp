@@ -13,16 +13,40 @@ Bullet::Bullet(GameObject& associated, float angle, float speed, int damage, flo
     : Component(associated){
 
     associated.angleDeg = angle;
-    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/cartinha.png", 1, 1);
-    associated.AddComponent(new Collider(associated));
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/Carta.png", 1, 1);
+    
     spriteRenderer->SetScale(1,1);
     associated.AddComponent(spriteRenderer);
+    
+    associated.AddComponent(new Collider(associated));
+
+ 
     
     Vec2 direction(0, 0);
     this->speed = Vec2(std::cos(angle * M_PI / 180.0f), std::sin(angle * M_PI / 180.0f)) * speed;
     this->damage = damage;
     this->distanceLeft = maxDistance;
     this->targetsPlayer = targetsPlayer;
+}
+
+Bullet::Bullet(GameObject& associated, float angle, float speed, int damage, float maxDistance, bool targetsPlayer, Vec2 scale, bool highCard)
+    : Component(associated){
+
+    associated.angleDeg = angle;
+    SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/Carta.png", 1, 1);
+    spriteRenderer->SetScale(scale.x, scale.y);
+    associated.AddComponent(spriteRenderer);
+
+    //associated.AddComponent(new Collider(associated));
+
+ 
+    
+    Vec2 direction(0, 0);
+    this->speed = Vec2(std::cos(angle * M_PI / 180.0f), std::sin(angle * M_PI / 180.0f)) * speed;
+    this->damage = damage;
+    this->distanceLeft = maxDistance;
+    this->targetsPlayer = targetsPlayer;
+    this->highCard = highCard;
 }
 
 void Bullet::Update(float dt) {
@@ -51,6 +75,7 @@ bool Bullet::Is(std::string type) const {
 }
 
 void Bullet::NotifyCollision(GameObject& other) {
+    if (!highCard){
     if (other.GetComponent("Zombie") != nullptr) {
         associated.RequestDelete();
     }
@@ -73,5 +98,6 @@ void Bullet::NotifyCollision(GameObject& other) {
         Boss* boss = (Boss*) other.GetComponent("Boss");
         if (!targetsPlayer )
         associated.RequestDelete();
+    }
     }
 }

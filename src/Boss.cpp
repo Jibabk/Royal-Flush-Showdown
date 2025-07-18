@@ -13,6 +13,8 @@
 #include <StageState.h>
 #include <CardSpringAttack.h>
 #include <iostream>
+#include <TileExplosionAttack.h>
+#include <GridHelper.h>
 
 Boss* Boss::chefe = nullptr;
 Vec2 inicialHandPos = Vec2(160, 40);
@@ -66,6 +68,39 @@ void Boss::Start() {
     
 }
 
+Vec2 AjustTileExplosion(std::pair<GridPosition, Vec2> tile) {
+    GridPosition gridPos = tile.first;
+    Vec2 pos = tile.second;
+
+    switch (gridPos.row)  // Ajusta a posição do tile com base na linha
+    {
+    case 0:
+        pos.x += 36;
+        pos.y += 57;
+        break;
+    case 1:
+        pos.x += 36;
+        pos.y += 52;
+        break;
+    case 2:
+        pos.x += 36;
+        pos.y += 47;
+        break;
+    case 3:
+        pos.x += 36;
+        pos.y += 42;
+        break;
+    case 4:
+        pos.x += 36;
+        pos.y += 53;
+        break;
+    default:
+        std::cerr << "Grid row out of bounds: " << gridPos.row << std::endl;
+        break;
+    }
+
+    return pos;
+}
 
 void Boss::Update(float dt) {
     Animator* animator = static_cast<Animator*>(associated.GetComponent("Animator"));
@@ -161,6 +196,27 @@ void Boss::Update(float dt) {
                 auto* gunCompB = (Gun*)gunB->GetComponent("Gun");
                 if (gunCompB) gunCompB->Shoot(cmd.pos);
             } 
+
+        } else if (cmd.type == Command::HIGH_CARD){
+            GridPosition playerTile = MapToGrid(cmd.pos);
+            Vec2 targetPosition = GetTileWorldPosition(playerTile.row, playerTile.col);
+            GameObject* explosionGO = new GameObject();
+            targetPosition = AjustTileExplosion({playerTile, targetPosition});
+
+
+           
+            if (auto gunPtr = gunLeft.lock()) {
+                auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
+                if (gunComp) gunComp->HighCard(targetPosition);
+            }
+            
+
+            // Center the box at targetPosition
+            explosionGO->box.x = targetPosition.x - explosionGO->box.w / 2;
+            explosionGO->box.y = targetPosition.y - explosionGO->box.h / 2;
+            explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 3.6f));
+            state.AddObject(explosionGO);
+            std::cout << "Tile explosion attack created at: (" << playerTile.row << ", " << playerTile.col << ")\n";
         } else if (cmd.type == Command::POSITION_HANDS_FOR_LASER) {
             auto gunA = gunLeft.lock();
             auto gunB = gunRight.lock();
@@ -188,10 +244,31 @@ void Boss::Update(float dt) {
                 }
 
             }
+        } else if (cmd.type == Command::PUNCH){
+            GridPosition playerTile = MapToGrid(cmd.pos);
+            std::vector <std::pair<int,int>> attackAreas= {{0,0},{0,1},{0,-1},{1,0},{-1,0}};
+            Vec2 targetPosition = GetTileWorldPosition(playerTile.row, playerTile.col);
+            targetPosition = AjustTileExplosion({playerTile, targetPosition});
+
+            if (auto gunPtr = gunLeft.lock()) {
+                auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
+                if (gunComp) gunComp->HighCard(targetPosition);
+            }
+            //std::vector <std::pair<int,int>> attackAreas= {{0,0},{0,1},{0,-1},{1,0},{-1,0},{-1,-1},{-1,1},{-2,-1},{-2,1},{-1,2},{-1,-2}};
+            for (const auto& area : attackAreas) {
+                GridPosition attackGridPos = {playerTile.row + area.first, playerTile.col + area.second};
+                Vec2 targetPosition = GetTileWorldPosition(attackGridPos.row, attackGridPos.col);
+                targetPosition = AjustTileExplosion({attackGridPos, targetPosition});
+                GameObject* explosionGO = new GameObject();
+                explosionGO->box.x = targetPosition.x - explosionGO->box.w / 2;
+                explosionGO->box.y = targetPosition.y - explosionGO->box.h / 2;
+                explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 3.6f));
+                state.AddObject(explosionGO);
+            }
+            std::cout << "Tile explosion attack created at: (" << playerTile.row << ", " << playerTile.col << ")\n";
+
+
         }
-
-
-
 
     }
     }
