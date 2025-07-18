@@ -41,6 +41,13 @@ public:
         linearSpeed = speed.Magnitude();
     }
 
+    float GetDamageCooldown() const {
+        return damageCooldown.Get();
+    }
+    void RestartDamageCooldown() {
+        damageCooldown.Restart();
+    }
+
     static int npcCount;
 
 private:

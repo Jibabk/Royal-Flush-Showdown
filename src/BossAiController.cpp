@@ -11,35 +11,81 @@ BossAiController::BossAiController(GameObject& associated)
     restTimer.Restart();
 }
 
+// ataque com a esquerda = 0
+// ataque com a direita = 1
+// ataque com as duas = 2
+// ataque com Card Spring = 3
+int AttackPattern0() { // 50% de chance de atacar com a esquerda ou direita
+    int chance = rand() % 2;
+    return chance;
+}
+
+int AttackPattern1() { // 33% de chance de atacar com as duas
+    int chance = rand() % 3;
+    if (chance == 0){
+        return 2;
+    }
+    return AttackPattern0();
+}
+
+int AttackPattern2() { // 20% de chance de atacar com o Card Spring
+    int chance = rand() % 5;
+    if (chance == 0) {
+        return 3;
+    } 
+    return AttackPattern1();
+}
+
+int getAttack(int currentHp){
+    if (currentHp < 50) {
+        return AttackPattern2();
+    } else if (currentHp < 70) {
+        return AttackPattern1(); 
+    } else {
+        return AttackPattern0(); 
+    }
+}
+
 void BossAiController::Update(float dt) {
     Component* cpt = associated.GetComponent("Boss");
-    if (static_cast<Boss*>(cpt)->IsDead()) {
-        return; // NPC está morto, não faz nada
-    }
-    if (Character::player == nullptr || Character::player->IsDead()) {
-        return; // Jogador morreu, NPC para de agir
-    }
-    
+    Boss* boss = static_cast<Boss*>(cpt);
+
+    if (!boss || boss->IsDead()) return;
+    if (!Character::player || Character::player->IsDead()) return;
 
     if (state == RESTING) {
         restTimer.Update(dt);
+
         if (restTimer.Get() >= restCooldown) {
-            // Pega a posição atual do jogador
-            destination = Character::player->GetAssociated().box.Center();
             state = MOVING;
+
+            destination = Character::player->GetAssociated().box.Center();
         }
     }
+
     else if (state == MOVING) {
+        int attack = getAttack(boss->GetHpPercent() * 100);
         Vec2 playerPos = Character::player->GetAssociated().box.Center();
-        if (cpt != nullptr) {
-            static_cast<Boss*>(cpt)->Issue(Boss::Command(Boss::Command::SHOOT_LEFT, playerPos.x, playerPos.y));
-            static_cast<Boss*>(cpt)->Issue(Boss::Command(Boss::Command::SHOOT_RIGHT, playerPos.x, playerPos.y));
-            
+
+        switch (attack) {
+            case 0:
+                boss->Issue(Boss::Command(Boss::Command::SHOOT_LEFT, playerPos.x, playerPos.y));  //SHOOT_LEFT
+                break;
+            case 1:
+                boss->Issue(Boss::Command(Boss::Command::POSITION_HANDS_FOR_LASER, playerPos.x, playerPos.y)); //SHOOT_RIGHT
+                break;
+            case 2:
+                boss->Issue(Boss::Command(Boss::Command::CARD_SPRING, playerPos.x, playerPos.y));  //SHOOT_BOTH
+                break;
+            case 3:
+                boss->Issue(Boss::Command(Boss::Command::CARD_SPRING, playerPos.x, playerPos.y)); //CARD_SPRING
+                break;
         }
         restTimer.Restart();
         state = RESTING;
     }
 }
+
 
 void BossAiController::Render() {
     // Não renderiza nada visível
