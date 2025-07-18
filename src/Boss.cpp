@@ -197,12 +197,20 @@ void Boss::Update(float dt) {
             GridPosition playerTile = MapToGrid(cmd.pos);
             Vec2 targetPosition = GetTileWorldPosition(playerTile.row, playerTile.col);
             GameObject* explosionGO = new GameObject();
-
             targetPosition = AjustTileExplosion({playerTile, targetPosition});
+
+
+           
+            if (auto gunPtr = gunLeft.lock()) {
+                auto* gunComp = (Gun*)gunPtr->GetComponent("Gun");
+                if (gunComp) gunComp->HighCard(targetPosition);
+            }
+            
+
             // Center the box at targetPosition
             explosionGO->box.x = targetPosition.x - explosionGO->box.w / 2;
             explosionGO->box.y = targetPosition.y - explosionGO->box.h / 2;
-            explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 2.0f));
+            explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 3.6f));
             state.AddObject(explosionGO);
             std::cout << "Tile explosion attack created at: (" << playerTile.row << ", " << playerTile.col << ")\n";
         } else if (cmd.type == Command::POSITION_HANDS_FOR_LASER) {
@@ -243,56 +251,9 @@ void Boss::Update(float dt) {
                 GameObject* explosionGO = new GameObject();
                 explosionGO->box.x = targetPosition.x - explosionGO->box.w / 2;
                 explosionGO->box.y = targetPosition.y - explosionGO->box.h / 2;
-                explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 2.0f));
+                explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 3.0f));
                 state.AddObject(explosionGO);
             }
-            /*
-            GridPosition area1 = {playerTile.row, playerTile.col - 1};
-            GridPosition area2 = {playerTile.row, playerTile.col + 1};
-            GridPosition area3 = {playerTile.row - 1, playerTile.col};
-            GridPosition area4 = {playerTile.row + 1, playerTile.col};
-
-            Vec2 targetPosition = GetTileWorldPosition(playerTile.row, playerTile.col);
-            Vec2 targetPosition1 = GetTileWorldPosition(area1.row, area1.col);
-            Vec2 targetPosition2 = GetTileWorldPosition(area2.row, area2.col);
-            Vec2 targetPosition3 = GetTileWorldPosition(area3.row, area3.col);
-            Vec2 targetPosition4 = GetTileWorldPosition(area4.row, area4.col);
-            GameObject* explosionGO = new GameObject();
-
-            targetPosition = AjustTileExplosion({playerTile, targetPosition});
-            targetPosition1 = AjustTileExplosion({area1, targetPosition1});
-            targetPosition2 = AjustTileExplosion({area2, targetPosition2});
-            targetPosition3 = AjustTileExplosion({area3, targetPosition3});
-            targetPosition4 = AjustTileExplosion({area4, targetPosition4});
-
-            // Center the box at PlayerPosition
-            explosionGO->box.x = targetPosition.x - explosionGO->box.w / 2;
-            explosionGO->box.y = targetPosition.y - explosionGO->box.h / 2;
-            explosionGO->AddComponent(new TileExplosionAttack(*explosionGO, Vec2(targetPosition.x, targetPosition.y), 2.0f));
-            state.AddObject(explosionGO);
-            
-            GameObject* explosionGO1 = new GameObject();
-            explosionGO1->box.x = targetPosition1.x - explosionGO1->box.w / 2;
-            explosionGO1->box.y = targetPosition1.y - explosionGO1->box.h / 2;
-            explosionGO1->AddComponent(new TileExplosionAttack(*explosionGO1, Vec2(targetPosition1.x, targetPosition1.y), 2.0f));
-            state.AddObject(explosionGO1);
-            GameObject* explosionGO2 = new GameObject();
-            explosionGO2->box.x = targetPosition2.x - explosionGO2->box.w / 2;
-            explosionGO2->box.y = targetPosition2.y - explosionGO2->box.h / 2;
-            explosionGO2->AddComponent(new TileExplosionAttack(*explosionGO2, Vec2(targetPosition2.x, targetPosition2.y), 2.0f));
-            state.AddObject(explosionGO2);
-            GameObject* explosionGO3 = new GameObject();
-            explosionGO3->box.x = targetPosition3.x - explosionGO3->box.w / 2;
-            explosionGO3->box.y = targetPosition3.y - explosionGO3->box.h / 2;
-            explosionGO3->AddComponent(new TileExplosionAttack(*explosionGO3, Vec2(targetPosition3.x, targetPosition3.y), 2.0f));
-            state.AddObject(explosionGO3);
-            GameObject* explosionGO4 = new GameObject();
-            explosionGO4->box.x = targetPosition4.x - explosionGO4->box.w / 2;
-            explosionGO4->box.y = targetPosition4.y - explosionGO4->box.h / 2;
-            explosionGO4->AddComponent(new TileExplosionAttack(*explosionGO4, Vec2(targetPosition4.x, targetPosition4.y), 2.0f));
-            state.AddObject(explosionGO4);
-            // Log para depuração*/
-
             std::cout << "Tile explosion attack created at: (" << playerTile.row << ", " << playerTile.col << ")\n";
 
 

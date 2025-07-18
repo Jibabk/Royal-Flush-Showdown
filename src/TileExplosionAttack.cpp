@@ -6,6 +6,7 @@
 #include "Sound.h"
 #include <SpriteRenderer.h>
 #include <iostream>
+#include <Animator.h>
 
 TileExplosionAttack::TileExplosionAttack(GameObject& associated, Vec2 targetPos, float delay)
     : Component(associated), targetPos(targetPos), timer(), delay(delay), exploded(false) {
@@ -16,6 +17,11 @@ TileExplosionAttack::TileExplosionAttack(GameObject& associated, Vec2 targetPos,
 
     associated.box.x = targetPos.x - associated.box.w / 2;
     associated.box.y = targetPos.y - associated.box.h / 2;
+    
+    Animator* animator = new Animator(associated);
+    animator->AddAnimation("boom", Animation(0, 4, 3.6, SDL_FLIP_NONE));
+    animator->SetAnimation("boom");
+    associated.AddComponent(animator);
 }
  
 void TileExplosionAttack::Update(float dt) {
