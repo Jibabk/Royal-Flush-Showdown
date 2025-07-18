@@ -2,25 +2,25 @@
 #define TITLE_STATE_H
 
 #include "State.h"
-#include "Music.h"
-#include "Timer.h"
+#include "GameObject.h"
+#include "Rect.h"
 
 class TitleState : public State {
 public:
     TitleState();
     ~TitleState();
 
-    void LoadAssets() override;
-    void Update(float dt) override;
-    void Render() override;
     void Start() override;
     void Pause() override;
     void Resume() override;
+    void LoadAssets() override;
+
+    void Update(float dt) override;
+    void Render() override;
 
 private:
-    bool showText = true;
-    Timer textTimer;
-
+    Rect jogarArea;
+    Rect sairArea;
 };
 
 #endif
