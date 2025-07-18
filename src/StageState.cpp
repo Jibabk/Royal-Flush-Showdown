@@ -20,9 +20,8 @@
 #include <Deck.h>
 #include <Card.h>
 #include <PokerHand.h>
-#include "Sound.h"
 
-StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"), cardPlaySound("Recursos/audio/efeitos/seleção_de_carta.wav"),deck(Deck()),cards() {
+StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"),deck(Deck()),cards() {
     // Background
     GameObject* bg = new GameObject();
     SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/background1.png");
@@ -191,7 +190,7 @@ void StageState::Update(float dt) {
     // ENTER -> selecionar tudo e avaliar
     if (input.KeyPress(SDLK_RETURN)) {
         std::vector<Card> selectedCards;
-        for (size_t i = 0; i < cards.size(); i++) {
+        for (int i=0; i < cards.size(); i++) {
             auto comp = (CardComponent*)cards[i]->GetComponent("CardComponent");
             if (comp) {
                 //comp->selected = true;
@@ -200,9 +199,6 @@ void StageState::Update(float dt) {
         }
 
         if (selectedCards.size() == 5) {
-
-            cardPlaySound.Play();
-
             PokerHand hand(selectedCards);
             PokerHand::HandRank result = hand.Evaluate(hand);
             std::cout << "[Poker] Mão avaliada: " << PokerHand::ToString(result) << std::endl;

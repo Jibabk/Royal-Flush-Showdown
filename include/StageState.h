@@ -6,8 +6,6 @@
 #include "Music.h"
 #include "Deck.h"
 #include "Timer.h"
-#include "Sound.h"
-
 class StageState : public State {
 public:
     StageState();
@@ -26,7 +24,6 @@ public:
 private:
     TileSet* tileSet;
     Music backgroundMusic;
-    Sound cardPlaySound; // Som específico para jogar cartas
     Sprite bg;
     Deck deck;
     std::vector<std::shared_ptr<GameObject>> cards;
