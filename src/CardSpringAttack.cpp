@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include <Animator.h>
 #include <iostream>
+#include "GridHelper.h"
 
 CardSpringAttack::CardSpringAttack(GameObject& associated, Vec2 start, Vec2 end)
     : Component(associated), durationTimer(), endPos(end), active(true) {
@@ -17,9 +18,9 @@ CardSpringAttack::CardSpringAttack(GameObject& associated, Vec2 start, Vec2 end)
     const float tileHeight = 65.0f;
 
     associated.box.x = std::min(start.x, end.x);
-    associated.box.y = start.y - 10; // Ajuste vertical
+    associated.box.y = start.y - 165; // Ajuste vertical
     associated.box.w = std::abs(start.x - end.x);
-    associated.box.h = 20; // Altura do laser
+    associated.box.h = 1; // Altura do laser
     associated.AddComponent(new Collider(associated));
 
     SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, "Recursos/img/card_laser.png", 1, 4);
@@ -46,10 +47,15 @@ void CardSpringAttack::Update(float dt) {
         active = false;
     }
 
-    std::cout << "Associated box: " <<  associated.box.y  << std::endl;
-    std::cout << "Player position: " << playerPos.x << ", " << playerPos.y << std::endl;
-    if (associated.box.y == playerPos.y) {
-        Character::player->TakeDamage(1);
+    GridPosition attackGridPos = MapToGrid(associated.box.Center());
+    GridPosition playerGridPos = MapToGrid(Character::player->GetAssociated().box.Center());
+
+    std::cout << "Laser Start Row: " << attackGridPos.row << ", Player Row: " << playerGridPos.row << std::endl;
+    if (attackGridPos.row == playerGridPos.row) {
+        if(Character::player->GetDamageCooldown() > 1.0f){
+            Character::player->TakeDamage(1);
+            Character::player->RestartDamageCooldown();
+        }
     }
     if (durationTimer.Get() > 0.2f) { // Duração de 0.2 segundos
         animator->SetAnimation("laser");
