@@ -171,7 +171,7 @@ void Gun::ShootHigh(Vec2 target) {
     auto& state = Game::GetInstance().GetCurrentState();
     GameObject* bulletGO = new GameObject();
     bulletGO->box.x = associated.box.x + associated.box.w / 2 - 5; // centraliza a bala
-    bulletGO->box.y = associated.box.y + associated.box.h / 2 - 500; // centraliza a bala
+    bulletGO->box.y = associated.box.y + associated.box.h / 2 - 100; // centraliza a bala
     bulletGO->AddComponent(new Bullet(*bulletGO, angle, 300, 10, 500,true, Vec2(2,2), true)); // velocidade, dano, distância máxima
     state.AddObject(bulletGO);  // adiciona a bala ao estado
     reloadSound.Play(1);  // toca som de recarga
