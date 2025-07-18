@@ -21,7 +21,7 @@ Vec2 inicialHandPos = Vec2(160, 40);
 
 Boss::Boss(GameObject& associated, std::string sprite)
     : Component(associated), speed(0, 0), linearSpeed(0), hp(100), maxHp(100), currentHp(100),
-      deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/efeitos/rei_hit.wav"),animationTimer() {
+      deathTimer(), damageCooldown(),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav"),animationTimer() {
 
     
     SpriteRenderer* spriteRenderer = new SpriteRenderer(associated, sprite, 10, 5);
