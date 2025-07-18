@@ -19,8 +19,9 @@ public:
 
 private:
     bool showText = true;
+    Music backgroundMusic;
     Timer textTimer;
 
 };
 
-#endif
+#endif // TITLE_STATE_H

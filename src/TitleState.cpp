@@ -12,7 +12,7 @@
 
 
 
-TitleState::TitleState(){
+TitleState::TitleState() : backgroundMusic("Recursos/audio/menu.wav"){
 
     GameObject* titleGO = new GameObject();
 
@@ -33,6 +33,8 @@ TitleState::TitleState(){
 
     AddObject(textGO);
 
+    backgroundMusic.SetVolume(64); // Define o volume da música para 100%, volume de 0 a 128
+    backgroundMusic.Play(); // Toca a música em loop
 
 }
 

@@ -21,7 +21,7 @@
 #include <Card.h>
 #include <PokerHand.h>
 
-StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()),cards() {
+StageState::StageState() : backgroundMusic("Recursos/audio/gameplay.wav"),deck(Deck()),cards() {
     // Background
     GameObject* bg = new GameObject();
     SpriteRenderer* bgRenderer = new SpriteRenderer(*bg, "Recursos/img/background1.png");
@@ -80,7 +80,7 @@ StageState::StageState() : backgroundMusic("Recursos/audio/BGM.wav"),deck(Deck()
 
 
 
-    backgroundMusic.SetVolume(128); // Define o volume da música para 100%, volume de 0 a 128
+    backgroundMusic.SetVolume(64); // Define o volume da música para 100%, volume de 0 a 128
     backgroundMusic.Play(); // Toca a música em loop
 }
 
@@ -164,6 +164,21 @@ void StageState::Update(float dt) {
     if (input.QuitRequested() || input.KeyPress(ESCAPE_KEY)) {
         popRequested = true;
     }
+
+    // Ajuste de volume com teclas
+    if (input.KeyPress(SDLK_KP_PLUS) || input.KeyPress(SDLK_PLUS)) {
+    int currentVol = Mix_VolumeMusic(-1);
+    backgroundMusic.SetVolume(currentVol + 8);
+    std::cout << "Volume atual: " << Mix_VolumeMusic(-1) << std::endl;
+    }
+    if (input.KeyPress(SDLK_KP_MINUS) || input.KeyPress(SDLK_MINUS)) {
+    int currentVol = Mix_VolumeMusic(-1);
+    backgroundMusic.SetVolume(currentVol - 8);
+    std::cout << "Volume atual: " << Mix_VolumeMusic(-1) << std::endl;
+    }
+
+
+
 
     //if (input.KeyPress(SDLK_SPACE)) {
     //    GameObject* zombie = new GameObject();
