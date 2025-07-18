@@ -10,7 +10,7 @@
 int Zombie::zombieCount = 0;
 
 Zombie::Zombie(GameObject& associated)
-    : Component(associated), hitpoints(100),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/Hit0.wav"),deathTimer(), facingLeft(false) {
+    : Component(associated), hitpoints(100),isDead(false),deathSound("Recursos/audio/Dead.wav"),hitSound("Recursos/audio/efeitos/hit.wav"),deathTimer(), facingLeft(false) {
     zombieCount++;
     // Cria e adiciona o SpriteRenderer
     SpriteRenderer* renderer = new SpriteRenderer(associated, "Recursos/img/Enemy.png", 3, 2);
