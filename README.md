@@ -56,6 +56,7 @@ Antes de começar, certifique-se de que você tem o `make` e um compilador C++ (
 
 * **Seta para cima/baixo/esquerda/direita:** ou **W,A,S,D** = Movimentação do personagem.
 * **Botão erquerdo do Mouse** = Selecionar a carta.
+* **X** = Descartar a carta selecionada e comprar nova
 * **Enter:** = Atacar com as cartas.
 * **+ & -** = Alterar o Volume do jogo.
 * **ESC:** = Sair do jogo ou voltar.
